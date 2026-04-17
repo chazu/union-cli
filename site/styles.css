@@ -17,12 +17,14 @@
   --evergreen:  #1f3a2b;
   --evergreen-soft: #2b4f3b;
   --oxblood:    #6d1f1f;
+  --orange:     #e06a28;
+  --orange-dark:#b5501a;
 
   --measure:    34rem;
   --hairline:   #c8b787;
 
-  --f-display:  "Bodoni Moda", "Didot", serif;
-  --f-label:    "IM Fell English SC", "Cormorant SC", "Libre Caslon", serif;
+  --f-display:  "Big Shoulders Display", "Oswald", "Impact", sans-serif;
+  --f-label:    "Special Elite", "Courier Prime", "Courier New", monospace;
   --f-body:     "Spectral", "Libre Caslon Text", Georgia, serif;
   --f-mono:     "JetBrains Mono", "SF Mono", "IBM Plex Mono", monospace;
 }
@@ -87,11 +89,11 @@ strong { font-weight: 700; color: var(--navy-ink); }
   position: relative;
 }
 .crest-stage::before {
-  /* faint radial halo behind the crest */
+  /* subtle paper-shadow behind the seal disc */
   content: "";
   position: absolute;
-  inset: -40px;
-  background: radial-gradient(circle, rgba(181,137,74,0.15) 0%, transparent 65%);
+  inset: -24px;
+  background: radial-gradient(circle, rgba(19, 32, 61, 0.14) 0%, transparent 58%);
   pointer-events: none;
   z-index: 0;
 }
@@ -114,32 +116,28 @@ strong { font-weight: 700; color: var(--navy-ink); }
 }
 
 .crest-ring-text {
-  font-family: var(--f-label);
-  font-size: 13.5px;
-  letter-spacing: 0.22em;
-  fill: var(--navy);
-}
-
-.plaque-text {
-  font-family: var(--f-mono);
-  font-size: 14.5px;
-  font-weight: 500;
-  fill: var(--cream);
-  letter-spacing: 0.02em;
-}
-
-.ribbon-text {
-  font-family: var(--f-label);
-  font-size: 13px;
-  letter-spacing: 0.28em;
-  fill: var(--cream);
-}
-
-.union-glyph {
   font-family: var(--f-display);
-  font-size: 22px;
-  font-weight: 700;
-  fill: var(--navy);
+  font-weight: 900;
+  font-size: 30px;
+  letter-spacing: 0.06em;
+  fill: var(--navy-ink);
+}
+
+.crest-motto {
+  font-family: var(--f-display);
+  font-weight: 800;
+  font-size: 17px;
+  letter-spacing: 0.14em;
+  fill: var(--navy-ink);
+}
+
+.crest-date {
+  font-family: var(--f-body);
+  font-style: italic;
+  font-weight: 500;
+  font-size: 15px;
+  letter-spacing: 0.02em;
+  fill: var(--navy-ink);
 }
 
 /* hero copy */

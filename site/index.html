@@ -7,7 +7,7 @@
 <meta name="description" content="Composable, versioned snippets for AGENTS.md / CLAUDE.md. A chartered registry of clauses, shops, and contracts for your coding agents." />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400;0,6..96,500;0,6..96,700;0,6..96,800;1,6..96,400&family=IM+Fell+English+SC&family=Spectral:ital,wght@0,300;0,400;0,500;0,700;1,400&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@400;600;700;800;900&family=Special+Elite&family=Spectral:ital,wght@0,300;0,400;0,500;0,700;1,400&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
 <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
@@ -26,111 +26,104 @@
 
     <!-- CREST -->
     <div class="crest-stage">
-      <svg class="crest" viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg" aria-label="Union crest">
+      <svg class="crest" viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg" aria-label="Union Local 0x00 seal">
         <defs>
-          <!-- engine-turned guilloché pattern -->
-          <pattern id="guilloche" x="0" y="0" width="14" height="14" patternUnits="userSpaceOnUse">
-            <circle cx="7" cy="7" r="5.5" fill="none" stroke="#1f3a2b" stroke-width="0.18" opacity="0.25"/>
-            <circle cx="0" cy="0" r="5.5" fill="none" stroke="#1f3a2b" stroke-width="0.18" opacity="0.25"/>
-            <circle cx="14" cy="14" r="5.5" fill="none" stroke="#1f3a2b" stroke-width="0.18" opacity="0.25"/>
-          </pattern>
-
-          <!-- the circular path the encircling text rides on -->
-          <path id="crestCircle" d="M 200,200 m -158,0 a 158,158 0 1,1 316,0 a 158,158 0 1,1 -316,0" fill="none" />
-
-          <!-- starburst rays behind the central device -->
-          <g id="rays">
-            <g stroke="#b5894a" stroke-width="0.7" opacity="0.35">
-              <line x1="200" y1="200" x2="200" y2="80" />
-              <line x1="200" y1="200" x2="200" y2="320" />
-              <line x1="200" y1="200" x2="80"  y2="200" />
-              <line x1="200" y1="200" x2="320" y2="200" />
-              <line x1="200" y1="200" x2="285" y2="115" />
-              <line x1="200" y1="200" x2="115" y2="285" />
-              <line x1="200" y1="200" x2="285" y2="285" />
-              <line x1="200" y1="200" x2="115" y2="115" />
-            </g>
-          </g>
+          <!-- encircling-text paths. Top reads L→R over the top; bottom uses side="right" to read upright. -->
+          <path id="ringTop" d="M 44,200 A 156,156 0 0,1 356,200" fill="none" />
+          <path id="ringBot" d="M 44,200 A 156,156 0 0,0 356,200" fill="none" />
+          <!-- inner italic ribbon path for "Organized MMXXVI" -->
+          <path id="dateArc" d="M 92,260 A 114,114 0 0,0 308,260" fill="none" />
         </defs>
 
-        <!-- outer ornamental ring -->
-        <circle cx="200" cy="200" r="190" fill="#f5ecd7" stroke="#1b2a4e" stroke-width="1.2" />
-        <circle cx="200" cy="200" r="184" fill="#f5ecd7" stroke="#1b2a4e" stroke-width="0.5" />
-        <circle cx="200" cy="200" r="178" fill="#f5ecd7" stroke="#1b2a4e" stroke-width="0.3" />
+        <!-- solid orange disc (the seal field) -->
+        <circle cx="200" cy="200" r="194" fill="#e06a28" />
 
-        <!-- guilloché ground -->
-        <circle cx="200" cy="200" r="145" fill="url(#guilloche)" stroke="#1f3a2b" stroke-width="0.6" opacity="0.9" />
+        <!-- inner heavy navy ring defines the text band -->
+        <circle cx="200" cy="200" r="192" fill="none" stroke="#13203d" stroke-width="3" />
+        <circle cx="200" cy="200" r="134" fill="none" stroke="#13203d" stroke-width="3" />
+        <!-- thin accent ring between heavy ring and inner circle -->
+        <circle cx="200" cy="200" r="178" fill="none" stroke="#13203d" stroke-width="0.8" />
 
-        <!-- starburst -->
-        <use href="#rays" />
-
-        <!-- encircling text -->
-        <text class="crest-ring-text" dy="-4">
-          <textPath href="#crestCircle" startOffset="0">
-            UNION · LOCAL 001 · AGENT CONTEXT WORKERS · CHARTERED MMXXVI ·
+        <!-- ring text -->
+        <text class="crest-ring-text">
+          <textPath href="#ringTop" startOffset="50%" text-anchor="middle">
+            UNION · LOCAL 0x00
+          </textPath>
+        </text>
+        <text class="crest-ring-text">
+          <textPath href="#ringBot" side="right" startOffset="50%" text-anchor="middle">
+            AGENT BABYSITTERS
           </textPath>
         </text>
 
-        <!-- tiny decorative stars between text runs; positioned by circle path -->
-        <g fill="#1b2a4e">
-          <circle cx="200" cy="42" r="1.4" />
-          <circle cx="200" cy="358" r="1.4" />
-          <circle cx="42"  cy="200" r="1.4" />
-          <circle cx="358" cy="200" r="1.4" />
+        <!-- side seam separators (diamond dots) between top and bottom arcs -->
+        <g fill="#13203d">
+          <path d="M 36,200 L 44,194 L 52,200 L 44,206 Z" />
+          <path d="M 364,200 L 356,194 L 348,200 L 356,206 Z" />
         </g>
 
-        <!-- ═════ crossed clause tags ═════ -->
-        <!-- left tag: <!-- BEGIN --> rotated ~ -22° -->
-        <g transform="translate(200 210) rotate(-22)">
-          <!-- plaque -->
-          <path d="M -108,-14 L -108,14 L 96,14 L 108,0 L 96,-14 Z"
-                fill="#1f3a2b" stroke="#b5894a" stroke-width="1.2" />
-          <path d="M -104,-10 L -104,10 L 94,10 L 102,0 L 94,-10 Z"
-                fill="none" stroke="#b5894a" stroke-width="0.4" opacity="0.8" />
-          <text class="plaque-text" x="-4" y="4" text-anchor="middle">&lt;!-- BEGIN --&gt;</text>
+        <!-- horizontal motto across the middle of the field -->
+        <text class="crest-motto" x="200" y="108" text-anchor="middle">
+          COMPOSE · VERSION · PROPAGATE
+        </text>
+
+        <!-- ═════ angry CRT — simplified 2-color silhouette ═════ -->
+        <g transform="translate(200 198)">
+          <!-- stand / base -->
+          <rect x="-5"  y="32" width="10" height="5"  fill="#13203d" />
+          <rect x="-22" y="35" width="44" height="4"  rx="1" fill="#13203d" />
+          <!-- chassis -->
+          <rect x="-46" y="-34" width="92" height="68" rx="5" fill="#13203d" />
+          <!-- bezel (cuts orange back in) -->
+          <rect x="-38" y="-27" width="76" height="52" rx="3" fill="#e06a28" />
+          <!-- screen frame inside bezel -->
+          <rect x="-35" y="-24" width="70" height="46" rx="2" fill="#13203d" />
+          <!-- subtle scanlines carved into screen -->
+          <g stroke="#e06a28" stroke-width="0.6" opacity="0.28">
+            <line x1="-33" y1="-15" x2="33" y2="-15" />
+            <line x1="-33" y1="-5"  x2="33" y2="-5" />
+            <line x1="-33" y1="5"   x2="33" y2="5" />
+            <line x1="-33" y1="15"  x2="33" y2="15" />
+          </g>
+          <!-- angry eyebrows (orange slashes on the navy screen) -->
+          <path d="M -25,-18 L -11,-11" stroke="#e06a28" stroke-width="3.2" stroke-linecap="round" />
+          <path d="M  25,-18 L  11,-11" stroke="#e06a28" stroke-width="3.2" stroke-linecap="round" />
+          <!-- pixel eyes -->
+          <rect x="-20" y="-8" width="8" height="6" fill="#e06a28" />
+          <rect x="12"  y="-8" width="8" height="6" fill="#e06a28" />
+          <rect x="-17" y="-5" width="3" height="3" fill="#13203d" />
+          <rect x="15"  y="-5" width="3" height="3" fill="#13203d" />
+          <!-- snarling zigzag mouth -->
+          <path d="M -18,14 L -12,10 L -6,14 L 0,10 L 6,14 L 12,10 L 18,14"
+                stroke="#e06a28" stroke-width="2.4" fill="none"
+                stroke-linejoin="miter" stroke-linecap="round" />
+          <!-- vent slits + power LED on chassis -->
+          <g fill="#e06a28">
+            <rect x="-42" y="29" width="6" height="1.6" />
+            <rect x="-34" y="29" width="6" height="1.6" />
+            <rect x="-26" y="29" width="6" height="1.6" />
+            <circle cx="38" cy="30" r="1.8" />
+          </g>
         </g>
 
-        <!-- right tag: <!-- END --> rotated ~ +22° -->
-        <g transform="translate(200 190) rotate(22)">
-          <path d="M -96,-14 L -108,0 L -96,14 L 108,14 L 108,-14 Z"
-                fill="#1f3a2b" stroke="#b5894a" stroke-width="1.2" />
-          <path d="M -94,-10 L -102,0 L -94,10 L 104,10 L 104,-10 Z"
-                fill="none" stroke="#b5894a" stroke-width="0.4" opacity="0.8" />
-          <text class="plaque-text" x="4" y="4" text-anchor="middle">&lt;!-- END --&gt;</text>
-        </g>
-
-        <!-- union symbol stamped at crossing point -->
-        <g transform="translate(200 200)">
-          <circle r="17" fill="#b5894a" stroke="#1b2a4e" stroke-width="1.2" />
-          <circle r="13" fill="none" stroke="#1b2a4e" stroke-width="0.4" />
-          <text class="union-glyph" text-anchor="middle" y="7">∪</text>
-        </g>
-
-        <!-- ribbon banner with motto -->
-        <g transform="translate(200 335)">
-          <path d="M -110,-12 L -98,0 L -110,12 L 110,12 L 122,0 L 110,-12 Z"
-                fill="#1f3a2b" stroke="#b5894a" stroke-width="1" />
-          <!-- ribbon tails -->
-          <path d="M -110,-12 L -126,-6 L -120,0 L -110,-8 Z"
-                fill="#153021" stroke="#b5894a" stroke-width="0.6" />
-          <path d="M  110,-12 L  126,-6 L  120,0 L  110,-8 Z"
-                fill="#153021" stroke="#b5894a" stroke-width="0.6" />
-          <path d="M -110, 12 L -126, 6 L -120,0 L -110, 8 Z"
-                fill="#153021" stroke="#b5894a" stroke-width="0.6" />
-          <path d="M  110, 12 L  126, 6 L  120,0 L  110, 8 Z"
-                fill="#153021" stroke="#b5894a" stroke-width="0.6" />
-          <text class="ribbon-text" text-anchor="middle" y="3">E&#8196;PLURIBUS&#8196;CLAUSULA</text>
-        </g>
-
+        <!-- organized date, italic script, riding the inner bottom arc -->
+        <text class="crest-date">
+          <textPath href="#dateArc" side="right" startOffset="50%" text-anchor="middle">
+            Organized MMXXVI
+          </textPath>
+        </text>
       </svg>
     </div>
 
-    <p class="eyebrow">Article Ø · The Preamble</p>
+    <p class="eyebrow">A CLI for agent instruction files</p>
     <h1 class="masthead">Union</h1>
     <p class="lede">
-      A chartered registry of <em>clauses</em>, <em>shops</em>, and <em>contracts</em>
-      for your coding agents. One versioned source of truth for every <code>AGENTS.md</code>
-      and <code>CLAUDE.md</code> you maintain.
+      Union manages composable, versioned snippets for your
+      <code>AGENTS.md</code> and <code>CLAUDE.md</code> files. Author a snippet
+      once in a central git-backed store, then include it in any project&rsquo;s
+      instruction file via marked regions &mdash; edits propagate to every
+      project that uses the snippet, while any content outside the markers is
+      left untouched.
     </p>
 
     <div class="hero-actions">

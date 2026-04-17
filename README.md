@@ -1,3 +1,5 @@
+<p align="center"><img src="site/logo.png" alt="union logo"></p>
+
 # union
 
 Composable, versioned snippet management for AGENTS.md / CLAUDE.md files.
