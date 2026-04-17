@@ -21,7 +21,7 @@ func newOrganizeCmd() *cobra.Command {
 			if len(args) == 1 {
 				dir = args[0]
 			}
-			abs, err := filepath.Abs(dir)
+			abs, err := resolveDir(dir)
 			if err != nil {
 				return err
 			}
@@ -55,4 +55,18 @@ func effectiveContract(c string) string {
 		return "AGENTS.md"
 	}
 	return c
+}
+
+// resolveDir returns the absolute, symlink-resolved path for dir so that
+// shops recorded on macOS /tmp work when the cwd reports /private/tmp (and
+// vice versa).
+func resolveDir(dir string) (string, error) {
+	abs, err := filepath.Abs(dir)
+	if err != nil {
+		return "", err
+	}
+	if real, err := filepath.EvalSymlinks(abs); err == nil {
+		return real, nil
+	}
+	return abs, nil
 }

@@ -38,7 +38,7 @@ func ParseContract(body []byte) ([]MarkedBlock, error) {
 					break
 				}
 				if _, ok := parseBegin(lines[j]); ok {
-					return nil, fmt.Errorf("nested BEGIN union:%s inside BEGIN union:%s (line %d)", parseBeginMust(lines[j]), path, j+1)
+					return nil, fmt.Errorf("nested BEGIN union:%s inside BEGIN union:%s (line %d)", parseBeginPath(lines[j]), path, j+1)
 				}
 			}
 			if end == -1 {
@@ -144,7 +144,7 @@ func parseBegin(line string) (string, bool) {
 	return strings.TrimSpace(inner), true
 }
 
-func parseBeginMust(line string) string {
+func parseBeginPath(line string) string {
 	p, _ := parseBegin(line)
 	return p
 }

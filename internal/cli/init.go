@@ -25,6 +25,13 @@ func newInitCmd() *cobra.Command {
 			if _, err := store.Init(dir); err != nil {
 				return err
 			}
+			shopsPath, err := paths.ShopsFile()
+			if err != nil {
+				return err
+			}
+			if err := os.WriteFile(shopsPath, []byte("# union shops registry\n"), 0o644); err != nil {
+				return fmt.Errorf("seed shops.toml: %w", err)
+			}
 			fmt.Fprintf(cmd.OutOrStdout(), "initialized union store at %s\n", dir)
 			return nil
 		},

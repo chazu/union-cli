@@ -50,7 +50,7 @@ func currentShop() (shop.Shop, string, error) {
 	if err != nil {
 		return shop.Shop{}, "", err
 	}
-	cwd, err = filepath.Abs(cwd)
+	cwd, err = resolveDir(cwd)
 	if err != nil {
 		return shop.Shop{}, "", err
 	}

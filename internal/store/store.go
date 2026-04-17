@@ -26,14 +26,12 @@ func Init(dir string) (*Store, error) {
 	if _, err := os.Stat(filepath.Join(dir, ".git")); err == nil {
 		return nil, fmt.Errorf("store already initialized at %s", dir)
 	}
-	if err := os.MkdirAll(filepath.Join(dir, "clauses"), 0o755); err != nil {
+	clausesDir := filepath.Join(dir, "clauses")
+	if err := os.MkdirAll(clausesDir, 0o755); err != nil {
 		return nil, fmt.Errorf("create clauses dir: %w", err)
 	}
-	shopsFile := filepath.Join(dir, "shops.toml")
-	if _, err := os.Stat(shopsFile); os.IsNotExist(err) {
-		if err := os.WriteFile(shopsFile, []byte("# union shops registry\n"), 0o644); err != nil {
-			return nil, fmt.Errorf("seed shops.toml: %w", err)
-		}
+	if err := os.WriteFile(filepath.Join(clausesDir, ".gitkeep"), nil, 0o644); err != nil {
+		return nil, fmt.Errorf("seed .gitkeep: %w", err)
 	}
 	s := &Store{root: dir}
 	if err := s.git("init", "-q"); err != nil {

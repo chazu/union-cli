@@ -42,12 +42,12 @@ union edit base/identity            # opens $EDITOR; save → updates AGENTS.md 
 | Command | Purpose |
 |---|---|
 | `union init` | Create `$UNION_DIR` and init its git repo |
-| `union new <path>` | Author a new clause (editor, stdin, or `-f FILE`) |
+| `union new <path> [-f FILE]` | Author a new clause (editor, stdin, or `-f FILE`; `-f -` reads stdin) |
 | `union clauses [prefix]` | List clauses in the store |
 | `union show <path>` | Print a clause |
-| `union edit <path>` | Edit a clause; propagates to ratified shops |
+| `union edit <path>` | Edit a clause in `$VISUAL`/`$EDITOR`; propagates to ratified shops |
 | `union expel <path>` | Delete a clause; strikes it from ratified shops |
-| `union organize [dir]` | Register a directory as a shop |
+| `union organize [dir] [--contract NAME]` | Register a directory as a shop (default contract `AGENTS.md`) |
 | `union shops` | List registered shops |
 | `union disband <dir>` | Unregister a shop |
 | `union ratify <path>` | Add a clause to this shop's contract |

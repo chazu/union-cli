@@ -58,7 +58,10 @@ func readClauseInput(fromFile, clausePath string) ([]byte, error) {
 }
 
 func openEditor(seed []byte, clausePath string) ([]byte, error) {
-	ed := os.Getenv("EDITOR")
+	ed := os.Getenv("VISUAL")
+	if ed == "" {
+		ed = os.Getenv("EDITOR")
+	}
 	if ed == "" {
 		ed = "vi"
 	}

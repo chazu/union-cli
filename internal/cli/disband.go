@@ -2,7 +2,6 @@ package cli
 
 import (
 	"fmt"
-	"path/filepath"
 
 	"github.com/chazu/union/internal/paths"
 	"github.com/chazu/union/internal/shop"
@@ -15,7 +14,7 @@ func newDisbandCmd() *cobra.Command {
 		Short: "Unregister a shop.",
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			abs, err := filepath.Abs(args[0])
+			abs, err := resolveDir(args[0])
 			if err != nil {
 				return err
 			}
