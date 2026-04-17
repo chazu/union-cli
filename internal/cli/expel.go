@@ -9,7 +9,7 @@ import (
 func newExpelCmd() *cobra.Command {
 	return &cobra.Command{
 		Use:   "expel <path>",
-		Short: "Remove a clause from the store.",
+		Short: "Remove a clause from the store and strike it from ratified shops.",
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			s, err := openStore()
@@ -21,6 +21,9 @@ func newExpelCmd() *cobra.Command {
 				return err
 			}
 			fmt.Fprintf(cmd.OutOrStdout(), "expelled clause %s\n", path)
+			if err := propagateRemoval(cmd.OutOrStdout(), path); err != nil {
+				return err
+			}
 			return nil
 		},
 	}

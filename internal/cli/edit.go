@@ -9,7 +9,7 @@ import (
 func newEditCmd() *cobra.Command {
 	return &cobra.Command{
 		Use:   "edit <path>",
-		Short: "Open a clause in $EDITOR; auto-commits on save.",
+		Short: "Open a clause in $EDITOR; auto-commits on save and propagates to ratified shops.",
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			s, err := openStore()
@@ -29,6 +29,9 @@ func newEditCmd() *cobra.Command {
 				return err
 			}
 			fmt.Fprintf(cmd.OutOrStdout(), "edited clause %s\n", path)
+			if err := propagateUpdate(cmd.OutOrStdout(), path, body); err != nil {
+				return err
+			}
 			return nil
 		},
 	}
