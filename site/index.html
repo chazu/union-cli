@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Union · A contract for your agents</title>
+<meta name="description" content="Composable, versioned snippets for AGENTS.md / CLAUDE.md. A chartered registry of clauses, shops, and contracts for your coding agents." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400;0,6..96,500;0,6..96,700;0,6..96,800;1,6..96,400&family=IM+Fell+English+SC&family=Spectral:ital,wght@0,300;0,400;0,500;0,700;1,400&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+<!--
+  ════════════════════════════════════════════════════════════════════
+   UNION — a union for your agents
+   Chartered MMXXVI · open source · not actually a labor local
+  ════════════════════════════════════════════════════════════════════
+-->
+
+<div class="parchment">
+
+  <!-- ═══════════ HERO ═══════════ -->
+  <header class="hero">
+
+    <!-- CREST -->
+    <div class="crest-stage">
+      <svg class="crest" viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg" aria-label="Union crest">
+        <defs>
+          <!-- engine-turned guilloché pattern -->
+          <pattern id="guilloche" x="0" y="0" width="14" height="14" patternUnits="userSpaceOnUse">
+            <circle cx="7" cy="7" r="5.5" fill="none" stroke="#1f3a2b" stroke-width="0.18" opacity="0.25"/>
+            <circle cx="0" cy="0" r="5.5" fill="none" stroke="#1f3a2b" stroke-width="0.18" opacity="0.25"/>
+            <circle cx="14" cy="14" r="5.5" fill="none" stroke="#1f3a2b" stroke-width="0.18" opacity="0.25"/>
+          </pattern>
+
+          <!-- the circular path the encircling text rides on -->
+          <path id="crestCircle" d="M 200,200 m -158,0 a 158,158 0 1,1 316,0 a 158,158 0 1,1 -316,0" fill="none" />
+
+          <!-- starburst rays behind the central device -->
+          <g id="rays">
+            <g stroke="#b5894a" stroke-width="0.7" opacity="0.35">
+              <line x1="200" y1="200" x2="200" y2="80" />
+              <line x1="200" y1="200" x2="200" y2="320" />
+              <line x1="200" y1="200" x2="80"  y2="200" />
+              <line x1="200" y1="200" x2="320" y2="200" />
+              <line x1="200" y1="200" x2="285" y2="115" />
+              <line x1="200" y1="200" x2="115" y2="285" />
+              <line x1="200" y1="200" x2="285" y2="285" />
+              <line x1="200" y1="200" x2="115" y2="115" />
+            </g>
+          </g>
+        </defs>
+
+        <!-- outer ornamental ring -->
+        <circle cx="200" cy="200" r="190" fill="#f5ecd7" stroke="#1b2a4e" stroke-width="1.2" />
+        <circle cx="200" cy="200" r="184" fill="#f5ecd7" stroke="#1b2a4e" stroke-width="0.5" />
+        <circle cx="200" cy="200" r="178" fill="#f5ecd7" stroke="#1b2a4e" stroke-width="0.3" />
+
+        <!-- guilloché ground -->
+        <circle cx="200" cy="200" r="145" fill="url(#guilloche)" stroke="#1f3a2b" stroke-width="0.6" opacity="0.9" />
+
+        <!-- starburst -->
+        <use href="#rays" />
+
+        <!-- encircling text -->
+        <text class="crest-ring-text" dy="-4">
+          <textPath href="#crestCircle" startOffset="0">
+            UNION · LOCAL 001 · AGENT CONTEXT WORKERS · CHARTERED MMXXVI ·
+          </textPath>
+        </text>
+
+        <!-- tiny decorative stars between text runs; positioned by circle path -->
+        <g fill="#1b2a4e">
+          <circle cx="200" cy="42" r="1.4" />
+          <circle cx="200" cy="358" r="1.4" />
+          <circle cx="42"  cy="200" r="1.4" />
+          <circle cx="358" cy="200" r="1.4" />
+        </g>
+
+        <!-- ═════ crossed clause tags ═════ -->
+        <!-- left tag: <!-- BEGIN --> rotated ~ -22° -->
+        <g transform="translate(200 210) rotate(-22)">
+          <!-- plaque -->
+          <path d="M -108,-14 L -108,14 L 96,14 L 108,0 L 96,-14 Z"
+                fill="#1f3a2b" stroke="#b5894a" stroke-width="1.2" />
+          <path d="M -104,-10 L -104,10 L 94,10 L 102,0 L 94,-10 Z"
+                fill="none" stroke="#b5894a" stroke-width="0.4" opacity="0.8" />
+          <text class="plaque-text" x="-4" y="4" text-anchor="middle">&lt;!-- BEGIN --&gt;</text>
+        </g>
+
+        <!-- right tag: <!-- END --> rotated ~ +22° -->
+        <g transform="translate(200 190) rotate(22)">
+          <path d="M -96,-14 L -108,0 L -96,14 L 108,14 L 108,-14 Z"
+                fill="#1f3a2b" stroke="#b5894a" stroke-width="1.2" />
+          <path d="M -94,-10 L -102,0 L -94,10 L 104,10 L 104,-10 Z"
+                fill="none" stroke="#b5894a" stroke-width="0.4" opacity="0.8" />
+          <text class="plaque-text" x="4" y="4" text-anchor="middle">&lt;!-- END --&gt;</text>
+        </g>
+
+        <!-- union symbol stamped at crossing point -->
+        <g transform="translate(200 200)">
+          <circle r="17" fill="#b5894a" stroke="#1b2a4e" stroke-width="1.2" />
+          <circle r="13" fill="none" stroke="#1b2a4e" stroke-width="0.4" />
+          <text class="union-glyph" text-anchor="middle" y="7">∪</text>
+        </g>
+
+        <!-- ribbon banner with motto -->
+        <g transform="translate(200 335)">
+          <path d="M -110,-12 L -98,0 L -110,12 L 110,12 L 122,0 L 110,-12 Z"
+                fill="#1f3a2b" stroke="#b5894a" stroke-width="1" />
+          <!-- ribbon tails -->
+          <path d="M -110,-12 L -126,-6 L -120,0 L -110,-8 Z"
+                fill="#153021" stroke="#b5894a" stroke-width="0.6" />
+          <path d="M  110,-12 L  126,-6 L  120,0 L  110,-8 Z"
+                fill="#153021" stroke="#b5894a" stroke-width="0.6" />
+          <path d="M -110, 12 L -126, 6 L -120,0 L -110, 8 Z"
+                fill="#153021" stroke="#b5894a" stroke-width="0.6" />
+          <path d="M  110, 12 L  126, 6 L  120,0 L  110, 8 Z"
+                fill="#153021" stroke="#b5894a" stroke-width="0.6" />
+          <text class="ribbon-text" text-anchor="middle" y="3">E&#8196;PLURIBUS&#8196;CLAUSULA</text>
+        </g>
+
+      </svg>
+    </div>
+
+    <p class="eyebrow">Article Ø · The Preamble</p>
+    <h1 class="masthead">Union</h1>
+    <p class="lede">
+      A chartered registry of <em>clauses</em>, <em>shops</em>, and <em>contracts</em>
+      for your coding agents. One versioned source of truth for every <code>AGENTS.md</code>
+      and <code>CLAUDE.md</code> you maintain.
+    </p>
+
+    <div class="hero-actions">
+      <a class="btn btn-primary" href="#article-i">Read the charter</a>
+      <a class="btn btn-ghost" href="https://github.com/chazu/union" target="_blank" rel="noopener">Source on GitHub &nearr;</a>
+    </div>
+
+    <div class="install" aria-label="Install command">
+      <span class="exhibit-label">Exhibit A · Installation</span>
+      <code>go install github.com/chazu/union/cmd/union@latest</code>
+    </div>
+  </header>
+
+  <!-- ═══════════ DIVIDER ═══════════ -->
+  <div class="rule" aria-hidden="true">
+    <span>·</span><span>✦</span><span>·</span>
+  </div>
+
+  <!-- ═══════════ ARTICLE I · CLAUSES ═══════════ -->
+  <section class="article" id="article-i">
+    <header class="article-head">
+      <span class="article-num">Article I</span>
+      <h2>Clauses</h2>
+      <p class="article-sub">
+        Reusable chunks of agent context, versioned together in a single store.
+      </p>
+    </header>
+
+    <div class="article-body">
+      <p>
+        A <strong>clause</strong> is a named markdown snippet kept under
+        <code>~/.union/clauses/</code>, organized by path the way <code>pass</code>
+        organizes secrets. Every edit is committed, so the history of your prompt
+        engineering lives in one place instead of being rewritten across a dozen
+        <code>AGENTS.md</code> files.
+      </p>
+
+      <pre class="codeblock" aria-label="Authoring a clause">
+<span class="cb-label">Exhibit B · Authoring a clause</span>
+<span class="cb-prompt">$</span> union new base/identity
+<span class="cb-prompt">$</span> printf 'Prefer terse answers.\n' | union new style/terse
+<span class="cb-prompt">$</span> union clauses
+base/identity
+style/terse</pre>
+    </div>
+  </section>
+
+  <div class="rule" aria-hidden="true">
+    <span>·</span><span>✦</span><span>·</span>
+  </div>
+
+  <!-- ═══════════ ARTICLE II · SHOPS ═══════════ -->
+  <section class="article" id="article-ii">
+    <header class="article-head">
+      <span class="article-num">Article II</span>
+      <h2>Shops</h2>
+      <p class="article-sub">
+        Your registered projects — the places a contract is composed.
+      </p>
+    </header>
+
+    <div class="article-body">
+      <p>
+        A <strong>shop</strong> is a project directory that union has been told
+        about. Registering one (<em>organizing</em>, in the parlance) adds it to a
+        central ledger so agents can discover your workspaces, and so edits to a
+        clause can flow back into every shop that ratified it.
+      </p>
+
+      <pre class="codeblock" aria-label="Organizing a shop">
+<span class="cb-label">Exhibit C · Organizing a shop</span>
+<span class="cb-prompt">$</span> cd ~/dev/my-project
+<span class="cb-prompt">$</span> union organize .
+<span class="cb-prompt">$</span> union shops
+/Users/you/dev/my-project    AGENTS.md</pre>
+    </div>
+  </section>
+
+  <div class="rule" aria-hidden="true">
+    <span>·</span><span>✦</span><span>·</span>
+  </div>
+
+  <!-- ═══════════ ARTICLE III · THE CONTRACT ═══════════ -->
+  <section class="article" id="article-iii">
+    <header class="article-head">
+      <span class="article-num">Article III</span>
+      <h2>The Contract</h2>
+      <p class="article-sub">
+        Clauses ratified into a shop, delimited by markers so human edits survive.
+      </p>
+    </header>
+
+    <div class="article-body">
+      <p>
+        The <strong>contract</strong> is the shop's <code>AGENTS.md</code>. Ratified
+        clauses are wrapped in HTML-comment markers; content outside the markers
+        is yours and is never touched. When you edit a clause, every contract that
+        ratified it is updated in place — no hand-syncing, no drift, and no
+        surprise commits in your project repos.
+      </p>
+
+      <pre class="codeblock" aria-label="A ratified contract">
+<span class="cb-label">Exhibit D · After <code>union ratify base/identity</code></span>
+# AGENTS.md
+&lt;!-- BEGIN union:base/identity --&gt;
+You are a careful, direct collaborator. You prefer
+specific answers over hedged ones.
+&lt;!-- END union:base/identity --&gt;</pre>
+    </div>
+  </section>
+
+  <div class="rule" aria-hidden="true">
+    <span>·</span><span>✦</span><span>·</span>
+  </div>
+
+  <!-- ═══════════ ARTICLE IV · RITES ═══════════ -->
+  <section class="article" id="article-iv">
+    <header class="article-head">
+      <span class="article-num">Article IV</span>
+      <h2>Rites &amp; Commands</h2>
+      <p class="article-sub">
+        The twelve observances a member should know.
+      </p>
+    </header>
+
+    <div class="article-body">
+      <table class="commands">
+        <thead>
+          <tr><th>Command</th><th>Meaning</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>union init</code></td><td>Charter a new store</td></tr>
+          <tr><td><code>union new</code></td><td>Draft a clause</td></tr>
+          <tr><td><code>union clauses</code></td><td>List the registry</td></tr>
+          <tr><td><code>union show</code></td><td>Read a clause aloud</td></tr>
+          <tr><td><code>union edit</code></td><td>Revise &amp; propagate</td></tr>
+          <tr><td><code>union expel</code></td><td>Retire a clause</td></tr>
+          <tr><td><code>union organize</code></td><td>Register a shop</td></tr>
+          <tr><td><code>union shops</code></td><td>Enumerate shops</td></tr>
+          <tr><td><code>union disband</code></td><td>Un-register a shop</td></tr>
+          <tr><td><code>union ratify</code></td><td>Adopt a clause into a contract</td></tr>
+          <tr><td><code>union strike</code></td><td>Remove a clause from a contract</td></tr>
+          <tr><td><code>union contract</code></td><td>Read the shop's current contract</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ═══════════ FOOTER ═══════════ -->
+  <footer class="footer">
+    <div class="rule" aria-hidden="true">
+      <span>·</span><span>✦</span><span>·</span>
+    </div>
+
+    <div class="footer-grid">
+      <div class="seal" aria-hidden="true">
+        <svg viewBox="0 0 160 160" width="120" height="120" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="80" cy="80" r="72" fill="none" stroke="#6d1f1f" stroke-width="2.4" opacity="0.82"/>
+          <circle cx="80" cy="80" r="62" fill="none" stroke="#6d1f1f" stroke-width="0.6" opacity="0.82"/>
+          <path id="sealPath" d="M 80,80 m -52,0 a 52,52 0 1,1 104,0 a 52,52 0 1,1 -104,0" fill="none"/>
+          <text class="seal-text" fill="#6d1f1f" opacity="0.88">
+            <textPath href="#sealPath" startOffset="0">CHARTERED · MMXXVI · BY THE MEMBERSHIP ·</textPath>
+          </text>
+          <text x="80" y="92" text-anchor="middle" class="seal-mark" fill="#6d1f1f" opacity="0.9">∪</text>
+        </svg>
+      </div>
+
+      <div class="footer-body">
+        <p class="footer-line">
+          Union is open source under the MIT License. The "local" is a fiction;
+          the software is real.
+        </p>
+        <p class="footer-line">
+          <a href="https://github.com/chazu/union" target="_blank" rel="noopener">Source</a>
+          &nbsp;·&nbsp;
+          <a href="https://github.com/chazu/union/blob/main/docs/superpowers/specs/2026-04-16-union-mvp-design.md" target="_blank" rel="noopener">Design spec</a>
+          &nbsp;·&nbsp;
+          <a href="https://github.com/chazu/union/issues" target="_blank" rel="noopener">Grievances</a>
+        </p>
+        <p class="footer-meta">
+          <span>Set in Bodoni Moda, Spectral, IM Fell English SC &amp; JetBrains Mono.</span>
+          <span>Posted at the hall, <time datetime="2026-04-16">the sixteenth of April, MMXXVI</time>.</span>
+        </p>
+      </div>
+    </div>
+  </footer>
+
+</div>
+
+<script src="main.js" defer></script>
+</body>
+</html>
