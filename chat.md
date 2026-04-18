@@ -278,5 +278,3 @@ Given your background, the sweet spot MVP is:
     Optional version locking
 
 Basically:
-
-    “Helm for agent context, but less cursed and more explicit.”

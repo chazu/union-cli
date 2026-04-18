@@ -10,8 +10,8 @@ via marked regions in each shop's contract file (default `AGENTS.md`).
 Edits to a clause propagate immediately into every shop that ratified it,
 leaving the resulting diff uncommitted for the user to review.
 
-See `docs/superpowers/specs/2026-04-16-union-mvp-design.md` for the full
-design.
+Or, as the stochastic parrot put it:
+> Helm for agent context, but less cursed and more explicit.
 
 ## Install
 
