@@ -28,6 +28,7 @@ func ValidateStoreName(name string) error {
 }
 
 // ValidateClausePath enforces the clause-path subset of the path grammar.
+// (Same rules the store already applies: no '', '..', leading '/', ' ', '//'.)
 func ValidateClausePath(p string) error {
 	if p == "" {
 		return fmt.Errorf("clause path is empty")
