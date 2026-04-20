@@ -11,28 +11,35 @@ import (
 
 func newInitCmd() *cobra.Command {
 	return &cobra.Command{
-		Use:   "init",
-		Short: "Initialize the union store.",
-		Args:  cobra.NoArgs,
-		RunE: func(cmd *cobra.Command, _ []string) error {
-			dir, err := paths.UnionDir()
+		Use:   "init [name]",
+		Short: "Initialize the union root and a first store (default: 'default').",
+		Args:  cobra.MaximumNArgs(1),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			name := "default"
+			if len(args) == 1 {
+				name = args[0]
+			}
+			unionDir, err := paths.UnionDir()
 			if err != nil {
 				return err
 			}
-			if err := os.MkdirAll(dir, 0o755); err != nil {
-				return fmt.Errorf("create %s: %w", dir, err)
-			}
-			if _, err := store.Init(dir); err != nil {
-				return err
+			if err := os.MkdirAll(unionDir, 0o755); err != nil {
+				return fmt.Errorf("create %s: %w", unionDir, err)
 			}
 			shopsPath, err := paths.ShopsFile()
 			if err != nil {
 				return err
 			}
-			if err := os.WriteFile(shopsPath, []byte("# union shops registry\n"), 0o644); err != nil {
-				return fmt.Errorf("seed shops.toml: %w", err)
+			if _, err := os.Stat(shopsPath); os.IsNotExist(err) {
+				if err := os.WriteFile(shopsPath, []byte("# union shops registry\n"), 0o644); err != nil {
+					return fmt.Errorf("seed shops.toml: %w", err)
+				}
 			}
-			fmt.Fprintf(cmd.OutOrStdout(), "initialized union store at %s\n", dir)
+			s, err := store.InitNamed(unionDir, name)
+			if err != nil {
+				return err
+			}
+			fmt.Fprintf(cmd.OutOrStdout(), "initialized store %q at %s\n", name, s.Root())
 			return nil
 		},
 	}
