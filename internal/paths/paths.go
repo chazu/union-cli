@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+
+	"github.com/chazu/union/internal/qpath"
 )
 
 // UnionDir returns the root directory of the union store.
@@ -20,13 +22,25 @@ func UnionDir() (string, error) {
 	return filepath.Join(home, ".union"), nil
 }
 
-// ClausesDir returns $UNION_DIR/clauses.
-func ClausesDir() (string, error) {
+// StoresDir returns $UNION_DIR/stores.
+func StoresDir() (string, error) {
 	root, err := UnionDir()
 	if err != nil {
 		return "", err
 	}
-	return filepath.Join(root, "clauses"), nil
+	return filepath.Join(root, "stores"), nil
+}
+
+// StoreDir returns $UNION_DIR/stores/<name>, validating the name.
+func StoreDir(name string) (string, error) {
+	if err := qpath.ValidateStoreName(name); err != nil {
+		return "", err
+	}
+	root, err := StoresDir()
+	if err != nil {
+		return "", err
+	}
+	return filepath.Join(root, name), nil
 }
 
 // ShopsFile returns $UNION_DIR/shops.toml.
@@ -36,4 +50,16 @@ func ShopsFile() (string, error) {
 		return "", err
 	}
 	return filepath.Join(root, "shops.toml"), nil
+}
+
+// ClausesDir is retained temporarily so existing call sites compile during
+// the multi-store migration. Removed in Task 7.
+//
+// Deprecated: use StoreDir(name) + "/clauses" instead.
+func ClausesDir() (string, error) {
+	root, err := UnionDir()
+	if err != nil {
+		return "", err
+	}
+	return filepath.Join(root, "clauses"), nil
 }

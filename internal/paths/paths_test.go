@@ -54,3 +54,32 @@ func TestShopsFile(t *testing.T) {
 		t.Errorf("ShopsFile() = %q, want /tmp/u/shops.toml", got)
 	}
 }
+
+func TestStoresDir(t *testing.T) {
+	t.Setenv("UNION_DIR", "/tmp/union-test")
+	got, err := StoresDir()
+	if err != nil {
+		t.Fatalf("StoresDir: %v", err)
+	}
+	if got != "/tmp/union-test/stores" {
+		t.Errorf("got %q, want /tmp/union-test/stores", got)
+	}
+}
+
+func TestStoreDir_Valid(t *testing.T) {
+	t.Setenv("UNION_DIR", "/tmp/union-test")
+	got, err := StoreDir("personal")
+	if err != nil {
+		t.Fatalf("StoreDir: %v", err)
+	}
+	if got != "/tmp/union-test/stores/personal" {
+		t.Errorf("got %q", got)
+	}
+}
+
+func TestStoreDir_Invalid(t *testing.T) {
+	t.Setenv("UNION_DIR", "/tmp/union-test")
+	if _, err := StoreDir("Bad Name"); err == nil {
+		t.Fatal("expected error for invalid store name")
+	}
+}
