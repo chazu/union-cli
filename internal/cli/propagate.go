@@ -8,6 +8,7 @@ import (
 	"path/filepath"
 
 	"github.com/chazu/union/internal/paths"
+	"github.com/chazu/union/internal/qpath"
 	"github.com/chazu/union/internal/shop"
 )
 
@@ -32,6 +33,9 @@ func propagateRemoval(w io.Writer, clausePath string) error {
 type rewriteFn func(contractPath string, body []byte) ([]byte, error)
 
 func eachRatifiedShop(w io.Writer, clausePath string, fn rewriteFn) error {
+	if _, err := qpath.Parse(clausePath); err != nil {
+		return err
+	}
 	shopsPath, err := paths.ShopsFile()
 	if err != nil {
 		return err
