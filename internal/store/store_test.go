@@ -1,7 +1,10 @@
 package store
 
 import (
+	"os"
 	"os/exec"
+	"path/filepath"
+	"reflect"
 	"testing"
 )
 
@@ -143,5 +146,78 @@ func TestPath_Rejects(t *testing.T) {
 		if err := s.Put(p, []byte("x"), "msg"); err == nil {
 			t.Errorf("Put(%q) accepted, want error", p)
 		}
+	}
+}
+
+func TestInitNamed_CreatesLayout(t *testing.T) {
+	requireGit(t)
+	union := t.TempDir()
+	s, err := InitNamed(union, "default")
+	if err != nil {
+		t.Fatalf("InitNamed: %v", err)
+	}
+	wantRoot := filepath.Join(union, "stores", "default")
+	if s.Root() != wantRoot {
+		t.Errorf("Root = %q, want %q", s.Root(), wantRoot)
+	}
+	if _, err := os.Stat(filepath.Join(wantRoot, ".git")); err != nil {
+		t.Errorf(".git missing: %v", err)
+	}
+	if _, err := os.Stat(filepath.Join(wantRoot, "clauses", ".gitkeep")); err != nil {
+		t.Errorf(".gitkeep missing: %v", err)
+	}
+}
+
+func TestInitNamed_RefusesInvalidName(t *testing.T) {
+	requireGit(t)
+	if _, err := InitNamed(t.TempDir(), "Bad Name"); err == nil {
+		t.Fatal("expected error on bad store name")
+	}
+}
+
+func TestOpenNamed_RoundTrip(t *testing.T) {
+	requireGit(t)
+	union := t.TempDir()
+	if _, err := InitNamed(union, "work"); err != nil {
+		t.Fatalf("InitNamed: %v", err)
+	}
+	s, err := OpenNamed(union, "work")
+	if err != nil {
+		t.Fatalf("OpenNamed: %v", err)
+	}
+	if err := s.Put("x/y", []byte("hello"), "new"); err != nil {
+		t.Fatalf("Put: %v", err)
+	}
+	got, _ := s.Get("x/y")
+	if string(got) != "hello" {
+		t.Errorf("Get = %q", got)
+	}
+}
+
+func TestListStores(t *testing.T) {
+	requireGit(t)
+	union := t.TempDir()
+	for _, name := range []string{"default", "personal", "work"} {
+		if _, err := InitNamed(union, name); err != nil {
+			t.Fatalf("InitNamed %s: %v", name, err)
+		}
+	}
+	got, err := ListStores(union)
+	if err != nil {
+		t.Fatalf("ListStores: %v", err)
+	}
+	if !reflect.DeepEqual(got, []string{"default", "personal", "work"}) {
+		t.Errorf("got %v", got)
+	}
+}
+
+func TestListStores_Empty(t *testing.T) {
+	union := t.TempDir()
+	got, err := ListStores(union)
+	if err != nil {
+		t.Fatalf("ListStores: %v", err)
+	}
+	if len(got) != 0 {
+		t.Errorf("got %v, want []", got)
 	}
 }

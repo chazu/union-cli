@@ -10,6 +10,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"regexp"
 	"sort"
 	"strings"
 )
@@ -207,6 +208,67 @@ func validatePath(p string) error {
 	}
 	if strings.Contains(p, "//") {
 		return fmt.Errorf("clause path may not contain '//': %q", p)
+	}
+	return nil
+}
+
+// InitNamed creates $unionDir/stores/<name>/ and initializes it as a store.
+func InitNamed(unionDir, name string) (*Store, error) {
+	if err := validateStoreName(name); err != nil {
+		return nil, err
+	}
+	dir := filepath.Join(unionDir, "stores", name)
+	if err := os.MkdirAll(filepath.Dir(dir), 0o755); err != nil {
+		return nil, fmt.Errorf("create stores dir: %w", err)
+	}
+	if err := os.MkdirAll(dir, 0o755); err != nil {
+		return nil, fmt.Errorf("create store dir: %w", err)
+	}
+	return Init(dir)
+}
+
+// OpenNamed opens the store at $unionDir/stores/<name>/.
+func OpenNamed(unionDir, name string) (*Store, error) {
+	if err := validateStoreName(name); err != nil {
+		return nil, err
+	}
+	dir := filepath.Join(unionDir, "stores", name)
+	return Open(dir)
+}
+
+// ListStores scans $unionDir/stores/ for subdirectories containing .git,
+// returning their names sorted.
+func ListStores(unionDir string) ([]string, error) {
+	storesDir := filepath.Join(unionDir, "stores")
+	entries, err := os.ReadDir(storesDir)
+	if err != nil {
+		if os.IsNotExist(err) {
+			return nil, nil
+		}
+		return nil, fmt.Errorf("read stores dir: %w", err)
+	}
+	var out []string
+	for _, e := range entries {
+		if !e.IsDir() {
+			continue
+		}
+		gitPath := filepath.Join(storesDir, e.Name(), ".git")
+		if _, err := os.Stat(gitPath); err != nil {
+			continue
+		}
+		out = append(out, e.Name())
+	}
+	sort.Strings(out)
+	return out, nil
+}
+
+// validateStoreName mirrors qpath.ValidateStoreName without importing qpath
+// (keeping the store package free of higher-level dependencies).
+var storeNameRE = regexp.MustCompile(`^[a-z0-9][a-z0-9_-]*$`)
+
+func validateStoreName(name string) error {
+	if !storeNameRE.MatchString(name) {
+		return fmt.Errorf("invalid store name %q: must match [a-z0-9][a-z0-9_-]*", name)
 	}
 	return nil
 }
