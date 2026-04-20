@@ -7,6 +7,9 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+
+	"github.com/chazu/union/internal/paths"
+	"github.com/chazu/union/internal/store"
 )
 
 func requireGit(t *testing.T) {
@@ -217,5 +220,73 @@ func TestE2E_RatifyRequiresOrganizedShop(t *testing.T) {
 	}
 	if !strings.Contains(err.Error(), "not an organized shop") {
 		t.Errorf("expected 'not an organized shop' in error, got: %v", err)
+	}
+}
+
+func TestE2E_EditPropagatesAcrossStoresIsolated(t *testing.T) {
+	requireGit(t)
+	unionDir := t.TempDir()
+	shopDir := t.TempDir()
+	t.Setenv("UNION_DIR", unionDir)
+
+	if _, err := runRoot(t, "init"); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := runRoot(t, "store", "add", "personal"); err != nil {
+		t.Fatal(err)
+	}
+
+	a := filepath.Join(t.TempDir(), "a.md")
+	b := filepath.Join(t.TempDir(), "b.md")
+	os.WriteFile(a, []byte("A1\n"), 0o644)
+	os.WriteFile(b, []byte("B1\n"), 0o644)
+
+	if _, err := runRoot(t, "new", "default:x/a", "-f", a); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := runRoot(t, "new", "personal:x/b", "-f", b); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := runRoot(t, "organize", shopDir); err != nil {
+		t.Fatal(err)
+	}
+
+	origWD, _ := os.Getwd()
+	os.Chdir(shopDir)
+	defer os.Chdir(origWD)
+
+	if _, err := runRoot(t, "ratify", "default:x/a"); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := runRoot(t, "ratify", "personal:x/b"); err != nil {
+		t.Fatal(err)
+	}
+
+	// Simulate an edit to personal:x/b by Put + propagateUpdate.
+	newBody := []byte("B2_EDITED\n")
+	unionRoot, err := paths.UnionDir()
+	if err != nil {
+		t.Fatal(err)
+	}
+	s, err := store.OpenNamed(unionRoot, "personal")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := s.Put("x/b", newBody, "edit"); err != nil {
+		t.Fatal(err)
+	}
+	if err := propagateUpdate(&bytes.Buffer{}, "personal:x/b", newBody); err != nil {
+		t.Fatal(err)
+	}
+
+	got, _ := os.ReadFile(filepath.Join(shopDir, "AGENTS.md"))
+	if !strings.Contains(string(got), "B2_EDITED") {
+		t.Errorf("edit didn't propagate:\n%s", got)
+	}
+	if !strings.Contains(string(got), "A1") {
+		t.Errorf("default block was touched:\n%s", got)
+	}
+	if strings.Contains(string(got), "B1\n") {
+		t.Errorf("old personal content still present:\n%s", got)
 	}
 }

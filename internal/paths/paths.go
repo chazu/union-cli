@@ -9,6 +9,9 @@ import (
 	"github.com/chazu/union/internal/qpath"
 )
 
+// StoresSubdir is the directory name under UNION_DIR that holds named stores.
+const StoresSubdir = "stores"
+
 // UnionDir returns the root directory of the union store.
 // Honors $UNION_DIR; defaults to ~/.union.
 func UnionDir() (string, error) {
@@ -28,7 +31,7 @@ func StoresDir() (string, error) {
 	if err != nil {
 		return "", err
 	}
-	return filepath.Join(root, "stores"), nil
+	return filepath.Join(root, StoresSubdir), nil
 }
 
 // StoreDir returns $UNION_DIR/stores/<name>, validating the name.

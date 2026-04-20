@@ -39,6 +39,7 @@ func TestParse_Invalid(t *testing.T) {
 		"store:../escape",
 		"store:a//b",
 		"store:has space",
+		"store:path:with:colon",
 	}
 	for _, s := range bad {
 		if _, err := Parse(s); err == nil {

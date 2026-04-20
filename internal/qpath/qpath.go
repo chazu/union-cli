@@ -45,6 +45,9 @@ func ValidateClausePath(p string) error {
 	if strings.Contains(p, "//") {
 		return fmt.Errorf("clause path may not contain '//': %q", p)
 	}
+	if strings.Contains(p, ":") {
+		return fmt.Errorf("clause path may not contain ':': %q", p)
+	}
 	return nil
 }
 

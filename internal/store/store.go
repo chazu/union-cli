@@ -14,6 +14,8 @@ import (
 	"regexp"
 	"sort"
 	"strings"
+
+	"github.com/chazu/union/internal/paths"
 )
 
 // streamOut and streamErr are the sinks for gitStream. Overridable by tests
@@ -225,7 +227,7 @@ func InitNamed(unionDir, name string) (*Store, error) {
 	if err := validateStoreName(name); err != nil {
 		return nil, err
 	}
-	dir := filepath.Join(unionDir, "stores", name)
+	dir := filepath.Join(unionDir, paths.StoresSubdir, name)
 	if err := os.MkdirAll(dir, 0o755); err != nil {
 		return nil, fmt.Errorf("create store dir: %w", err)
 	}
@@ -237,14 +239,14 @@ func OpenNamed(unionDir, name string) (*Store, error) {
 	if err := validateStoreName(name); err != nil {
 		return nil, err
 	}
-	dir := filepath.Join(unionDir, "stores", name)
+	dir := filepath.Join(unionDir, paths.StoresSubdir, name)
 	return Open(dir)
 }
 
 // ListStores scans $unionDir/stores/ for subdirectories containing .git,
 // returning their names sorted.
 func ListStores(unionDir string) ([]string, error) {
-	storesDir := filepath.Join(unionDir, "stores")
+	storesDir := filepath.Join(unionDir, paths.StoresSubdir)
 	entries, err := os.ReadDir(storesDir)
 	if err != nil {
 		if os.IsNotExist(err) {

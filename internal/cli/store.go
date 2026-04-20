@@ -45,7 +45,7 @@ func newStoreAddCmd() *cobra.Command {
 			if err != nil {
 				return err
 			}
-			dir := filepath.Join(unionDir, "stores", name)
+			dir := filepath.Join(unionDir, paths.StoresSubdir, name)
 			if _, err := os.Stat(dir); err == nil {
 				return fmt.Errorf("store already exists: %s", name)
 			}
@@ -95,9 +95,9 @@ func newStoreRemoveCmd() *cobra.Command {
 			if err != nil {
 				return err
 			}
-			dir := filepath.Join(unionDir, "stores", name)
+			dir := filepath.Join(unionDir, paths.StoresSubdir, name)
 			if _, err := os.Stat(dir); err != nil {
-				return fmt.Errorf("no such store: %s", name)
+				return fmt.Errorf("no such store: %s (run 'union store list')", name)
 			}
 			offenders, err := shopsReferencingStore(name)
 			if err != nil {
@@ -110,6 +110,7 @@ func newStoreRemoveCmd() *cobra.Command {
 			if err := os.RemoveAll(dir); err != nil {
 				return fmt.Errorf("remove store: %w", err)
 			}
+			fmt.Fprintf(cmd.OutOrStdout(), "removed store %q\n", name)
 			return nil
 		},
 	}
@@ -300,7 +301,7 @@ func openStoreByName(name string) (*unionstore.Store, error) {
 	}
 	s, err := unionstore.OpenNamed(unionDir, name)
 	if err != nil {
-		return nil, fmt.Errorf("no such store: %s", name)
+		return nil, fmt.Errorf("no such store: %s (run 'union store list')", name)
 	}
 	return s, nil
 }

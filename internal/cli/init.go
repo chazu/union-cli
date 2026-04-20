@@ -5,6 +5,7 @@ import (
 	"os"
 
 	"github.com/chazu/union/internal/paths"
+	"github.com/chazu/union/internal/qpath"
 	"github.com/chazu/union/internal/store"
 	"github.com/spf13/cobra"
 )
@@ -18,6 +19,9 @@ func newInitCmd() *cobra.Command {
 			name := "default"
 			if len(args) == 1 {
 				name = args[0]
+			}
+			if err := qpath.ValidateStoreName(name); err != nil {
+				return err
 			}
 			unionDir, err := paths.UnionDir()
 			if err != nil {
