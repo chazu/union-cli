@@ -169,7 +169,6 @@ func TestInitNamed_CreatesLayout(t *testing.T) {
 }
 
 func TestInitNamed_RefusesInvalidName(t *testing.T) {
-	requireGit(t)
 	if _, err := InitNamed(t.TempDir(), "Bad Name"); err == nil {
 		t.Fatal("expected error on bad store name")
 	}

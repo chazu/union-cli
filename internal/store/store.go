@@ -218,9 +218,6 @@ func InitNamed(unionDir, name string) (*Store, error) {
 		return nil, err
 	}
 	dir := filepath.Join(unionDir, "stores", name)
-	if err := os.MkdirAll(filepath.Dir(dir), 0o755); err != nil {
-		return nil, fmt.Errorf("create stores dir: %w", err)
-	}
 	if err := os.MkdirAll(dir, 0o755); err != nil {
 		return nil, fmt.Errorf("create store dir: %w", err)
 	}
