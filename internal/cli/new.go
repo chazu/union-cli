@@ -7,9 +7,7 @@ import (
 	"os/exec"
 	"path/filepath"
 
-	"github.com/chazu/union/internal/paths"
 	"github.com/chazu/union/internal/qpath"
-	"github.com/chazu/union/internal/store"
 	"github.com/spf13/cobra"
 	"golang.org/x/term"
 )
@@ -92,10 +90,3 @@ func openEditor(seed []byte, clausePath string) ([]byte, error) {
 	return os.ReadFile(tmpPath)
 }
 
-func openStore() (*store.Store, error) {
-	dir, err := paths.UnionDir()
-	if err != nil {
-		return nil, err
-	}
-	return store.Open(dir)
-}
