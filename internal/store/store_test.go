@@ -5,6 +5,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"reflect"
+	"strings"
 	"testing"
 )
 
@@ -218,5 +219,67 @@ func TestListStores_Empty(t *testing.T) {
 	}
 	if len(got) != 0 {
 		t.Errorf("got %v, want []", got)
+	}
+}
+
+func bareRepo(t *testing.T) string {
+	t.Helper()
+	dir := t.TempDir()
+	cmd := exec.Command("git", "init", "--bare", "-q", dir)
+	if out, err := cmd.CombinedOutput(); err != nil {
+		t.Fatalf("git init --bare: %v\n%s", err, out)
+	}
+	return dir
+}
+
+func TestRemoteAddListRemove(t *testing.T) {
+	s := newTestStore(t)
+	if err := s.RemoteAdd("origin", "https://example.com/r.git"); err != nil {
+		t.Fatalf("RemoteAdd: %v", err)
+	}
+	rs, err := s.Remotes()
+	if err != nil {
+		t.Fatalf("Remotes: %v", err)
+	}
+	if len(rs) != 1 || rs[0].Name != "origin" || rs[0].URL != "https://example.com/r.git" {
+		t.Errorf("got %+v", rs)
+	}
+	if err := s.RemoteRemove("origin"); err != nil {
+		t.Fatalf("RemoteRemove: %v", err)
+	}
+	rs, _ = s.Remotes()
+	if len(rs) != 0 {
+		t.Errorf("expected no remotes after remove, got %+v", rs)
+	}
+}
+
+func TestPushPullRoundTrip(t *testing.T) {
+	s := newTestStore(t)
+	remote := bareRepo(t)
+	if err := s.RemoteAdd("origin", remote); err != nil {
+		t.Fatalf("RemoteAdd: %v", err)
+	}
+	if err := s.Put("a/b", []byte("x"), "add a/b"); err != nil {
+		t.Fatalf("Put: %v", err)
+	}
+	if err := s.Push("origin", ""); err != nil {
+		t.Fatalf("Push: %v", err)
+	}
+	if err := s.Fetch("origin"); err != nil {
+		t.Fatalf("Fetch: %v", err)
+	}
+	if err := s.Pull("origin", ""); err != nil {
+		t.Fatalf("Pull: %v", err)
+	}
+}
+
+func TestStatus(t *testing.T) {
+	s := newTestStore(t)
+	out, err := s.Status()
+	if err != nil {
+		t.Fatalf("Status: %v", err)
+	}
+	if !strings.Contains(out, "##") {
+		t.Errorf("expected porcelain branch line, got %q", out)
 	}
 }

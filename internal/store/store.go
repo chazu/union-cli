@@ -269,3 +269,122 @@ func validateStoreName(name string) error {
 	}
 	return nil
 }
+
+// Remote is a name/URL pair.
+type Remote struct {
+	Name string
+	URL  string
+}
+
+// RemoteAdd runs `git remote add <name> <url>` in the store.
+func (s *Store) RemoteAdd(name, url string) error {
+	return s.git("remote", "add", name, url)
+}
+
+// RemoteRemove runs `git remote remove <name>`.
+func (s *Store) RemoteRemove(name string) error {
+	return s.git("remote", "remove", name)
+}
+
+// Remotes returns the configured remotes, sorted by name.
+func (s *Store) Remotes() ([]Remote, error) {
+	out, err := s.gitCapture("remote", "-v")
+	if err != nil {
+		return nil, err
+	}
+	seen := map[string]string{}
+	for _, line := range strings.Split(strings.TrimRight(out, "\n"), "\n") {
+		if line == "" {
+			continue
+		}
+		fields := strings.Fields(line)
+		if len(fields) < 2 {
+			continue
+		}
+		seen[fields[0]] = fields[1]
+	}
+	var rs []Remote
+	for n, u := range seen {
+		rs = append(rs, Remote{Name: n, URL: u})
+	}
+	sort.Slice(rs, func(i, j int) bool { return rs[i].Name < rs[j].Name })
+	return rs, nil
+}
+
+// Push runs `git push` in the store. Empty branch pushes HEAD (current branch).
+func (s *Store) Push(remote, branch string) error {
+	args := []string{"push"}
+	if remote != "" {
+		args = append(args, remote)
+	}
+	if branch != "" {
+		args = append(args, branch)
+	} else {
+		// Push HEAD by name so git doesn't require an upstream tracking branch.
+		args = append(args, "HEAD")
+	}
+	return s.gitStream(args...)
+}
+
+// Pull runs `git pull --rebase` in the store. Empty branch uses the current branch.
+func (s *Store) Pull(remote, branch string) error {
+	args := []string{"pull", "--rebase"}
+	if remote != "" {
+		args = append(args, remote)
+		// git pull requires a branch when a remote is explicitly given and no
+		// upstream tracking is configured.  Resolve the current branch name.
+		b := branch
+		if b == "" {
+			var err error
+			b, err = s.gitCapture("rev-parse", "--abbrev-ref", "HEAD")
+			if err != nil {
+				return fmt.Errorf("resolve current branch: %w", err)
+			}
+			b = strings.TrimSpace(b)
+		}
+		args = append(args, b)
+	} else if branch != "" {
+		args = append(args, branch)
+	}
+	return s.gitStream(args...)
+}
+
+// Fetch runs `git fetch [remote]`.
+func (s *Store) Fetch(remote string) error {
+	args := []string{"fetch"}
+	if remote != "" {
+		args = append(args, remote)
+	}
+	return s.gitStream(args...)
+}
+
+// Status returns `git status --short --branch` output.
+func (s *Store) Status() (string, error) {
+	return s.gitCapture("status", "--short", "--branch")
+}
+
+// gitCapture runs git and returns stdout.
+func (s *Store) gitCapture(args ...string) (string, error) {
+	cmd := exec.Command("git", args...)
+	cmd.Dir = s.root
+	var out, stderr bytes.Buffer
+	cmd.Stdout = &out
+	cmd.Stderr = &stderr
+	if err := cmd.Run(); err != nil {
+		return "", fmt.Errorf("git %s: %v: %s", strings.Join(args, " "), err, stderr.String())
+	}
+	return out.String(), nil
+}
+
+// gitStream runs git with stdout/stderr wired to the user's terminal so
+// progress output from push/pull/fetch surfaces. Used for long-running ops.
+func (s *Store) gitStream(args ...string) error {
+	cmd := exec.Command("git", args...)
+	cmd.Dir = s.root
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	if err := cmd.Run(); err != nil {
+		return fmt.Errorf("git %s: %w", strings.Join(args, " "), err)
+	}
+	return nil
+}
