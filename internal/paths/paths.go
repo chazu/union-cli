@@ -51,15 +51,3 @@ func ShopsFile() (string, error) {
 	}
 	return filepath.Join(root, "shops.toml"), nil
 }
-
-// ClausesDir is retained temporarily so existing call sites compile during
-// the multi-store migration. Removed in Task 7.
-//
-// Deprecated: use StoreDir(name) + "/clauses" instead.
-func ClausesDir() (string, error) {
-	root, err := UnionDir()
-	if err != nil {
-		return "", err
-	}
-	return filepath.Join(root, "clauses"), nil
-}

@@ -33,17 +33,6 @@ func TestUnionDir_EnvOverride(t *testing.T) {
 	}
 }
 
-func TestClausesDir(t *testing.T) {
-	t.Setenv("UNION_DIR", "/tmp/u")
-	got, err := ClausesDir()
-	if err != nil {
-		t.Fatalf("ClausesDir: %v", err)
-	}
-	if got != "/tmp/u/clauses" {
-		t.Errorf("ClausesDir() = %q, want /tmp/u/clauses", got)
-	}
-}
-
 func TestShopsFile(t *testing.T) {
 	t.Setenv("UNION_DIR", "/tmp/u")
 	got, err := ShopsFile()

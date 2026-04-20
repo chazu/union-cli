@@ -3,6 +3,7 @@ package cli
 import (
 	"fmt"
 
+	"github.com/chazu/union/internal/qpath"
 	"github.com/spf13/cobra"
 )
 
@@ -12,19 +13,19 @@ func newExpelCmd() *cobra.Command {
 		Short: "Remove a clause from the store and strike it from ratified shops.",
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			s, err := openStore()
+			q, err := qpath.Parse(args[0])
 			if err != nil {
 				return err
 			}
-			path := args[0]
-			if err := s.Delete(path, "expel "+path); err != nil {
+			s, err := openStoreFor(q)
+			if err != nil {
 				return err
 			}
-			fmt.Fprintf(cmd.OutOrStdout(), "expelled clause %s\n", path)
-			if err := propagateRemoval(cmd.OutOrStdout(), path); err != nil {
+			if err := s.Delete(q.Path, "expel "+q.String()); err != nil {
 				return err
 			}
-			return nil
+			fmt.Fprintf(cmd.OutOrStdout(), "expelled clause %s\n", q)
+			return propagateRemoval(cmd.OutOrStdout(), q.String())
 		},
 	}
 }

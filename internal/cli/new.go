@@ -8,6 +8,7 @@ import (
 	"path/filepath"
 
 	"github.com/chazu/union/internal/paths"
+	"github.com/chazu/union/internal/qpath"
 	"github.com/chazu/union/internal/store"
 	"github.com/spf13/cobra"
 	"golang.org/x/term"
@@ -20,22 +21,25 @@ func newNewCmd() *cobra.Command {
 		Short: "Author a new clause (editor by default; stdin if piped; -f to seed from a file).",
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			s, err := openStore()
+			q, err := qpath.Parse(args[0])
 			if err != nil {
 				return err
 			}
-			path := args[0]
-			if s.Has(path) {
-				return fmt.Errorf("clause already exists: %s (use 'union edit' to change it)", path)
-			}
-			body, err := readClauseInput(fromFile, path)
+			s, err := openStoreFor(q)
 			if err != nil {
 				return err
 			}
-			if err := s.Put(path, body, "new "+path); err != nil {
+			if s.Has(q.Path) {
+				return fmt.Errorf("clause already exists: %s (use 'union edit' to change it)", q)
+			}
+			body, err := readClauseInput(fromFile, q.Path)
+			if err != nil {
 				return err
 			}
-			fmt.Fprintf(cmd.OutOrStdout(), "created clause %s\n", path)
+			if err := s.Put(q.Path, body, "new "+q.String()); err != nil {
+				return err
+			}
+			fmt.Fprintf(cmd.OutOrStdout(), "created clause %s\n", q)
 			return nil
 		},
 	}

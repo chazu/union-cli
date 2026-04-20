@@ -7,7 +7,9 @@ import (
 	"path/filepath"
 
 	"github.com/chazu/union/internal/paths"
+	"github.com/chazu/union/internal/qpath"
 	"github.com/chazu/union/internal/shop"
+	"github.com/chazu/union/internal/store"
 	"github.com/spf13/cobra"
 )
 
@@ -41,6 +43,18 @@ func Execute() {
 		fmt.Fprintln(os.Stderr, "error:", err)
 		os.Exit(1)
 	}
+}
+
+func openStoreFor(q qpath.Qualified) (*store.Store, error) {
+	unionDir, err := paths.UnionDir()
+	if err != nil {
+		return nil, err
+	}
+	s, err := store.OpenNamed(unionDir, q.Store)
+	if err != nil {
+		return nil, fmt.Errorf("no such store: %s (run 'union store list')", q.Store)
+	}
+	return s, nil
 }
 
 // currentShop returns the registered Shop for the current working directory,

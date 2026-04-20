@@ -1,6 +1,9 @@
 package cli
 
-import "github.com/spf13/cobra"
+import (
+	"github.com/chazu/union/internal/qpath"
+	"github.com/spf13/cobra"
+)
 
 func newShowCmd() *cobra.Command {
 	return &cobra.Command{
@@ -8,11 +11,15 @@ func newShowCmd() *cobra.Command {
 		Short: "Print a clause's content.",
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			s, err := openStore()
+			q, err := qpath.Parse(args[0])
 			if err != nil {
 				return err
 			}
-			body, err := s.Get(args[0])
+			s, err := openStoreFor(q)
+			if err != nil {
+				return err
+			}
+			body, err := s.Get(q.Path)
 			if err != nil {
 				return err
 			}
