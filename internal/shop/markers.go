@@ -3,6 +3,7 @@ package shop
 import (
 	"bytes"
 	"fmt"
+	"regexp"
 	"strings"
 )
 
@@ -12,6 +13,12 @@ const (
 	markerSfx   = " -->"
 )
 
+// qualifiedRE matches "<store>:<clause-path>" where the store is a valid
+// store name ([a-z0-9][a-z0-9_-]*) and the clause path has no whitespace.
+// Structural clause-path rules (../, //, leading /) are enforced by callers
+// via qpath.Parse; the marker parser just needs an unambiguous grammar.
+var qualifiedRE = regexp.MustCompile(`^[a-z0-9][a-z0-9_-]*:[^\s]+$`)
+
 // MarkedBlock is one ratified clause region inside a contract.
 type MarkedBlock struct {
 	Path      string
@@ -20,13 +27,24 @@ type MarkedBlock struct {
 	Body      []byte
 }
 
-// ParseContract scans body for union:<path> marker pairs.
+// ParseContract scans body for union:<store>:<path> marker pairs.
 func ParseContract(body []byte) ([]MarkedBlock, error) {
 	lines := splitLines(body)
 	var blocks []MarkedBlock
 	i := 0
 	for i < len(lines) {
 		line := lines[i]
+		trimmed := strings.TrimSpace(line)
+		if strings.HasPrefix(trimmed, beginPrefix) {
+			if _, ok := parseBegin(line); !ok {
+				return nil, fmt.Errorf("invalid BEGIN marker at line %d: expected <store>:<path>, got: %s", i+1, trimmed)
+			}
+		}
+		if strings.HasPrefix(trimmed, endPrefix) {
+			if _, ok := parseEnd(line); !ok {
+				return nil, fmt.Errorf("invalid END marker at line %d: expected <store>:<path>, got: %s", i+1, trimmed)
+			}
+		}
 		if path, ok := parseBegin(line); ok {
 			end := -1
 			for j := i + 1; j < len(lines); j++ {
@@ -140,8 +158,11 @@ func parseBegin(line string) (string, bool) {
 	if !strings.HasPrefix(line, beginPrefix) || !strings.HasSuffix(line, markerSfx) {
 		return "", false
 	}
-	inner := strings.TrimSuffix(strings.TrimPrefix(line, beginPrefix), markerSfx)
-	return strings.TrimSpace(inner), true
+	inner := strings.TrimSpace(strings.TrimSuffix(strings.TrimPrefix(line, beginPrefix), markerSfx))
+	if !qualifiedRE.MatchString(inner) {
+		return "", false
+	}
+	return inner, true
 }
 
 func parseBeginPath(line string) string {
@@ -154,8 +175,11 @@ func parseEnd(line string) (string, bool) {
 	if !strings.HasPrefix(line, endPrefix) || !strings.HasSuffix(line, markerSfx) {
 		return "", false
 	}
-	inner := strings.TrimSuffix(strings.TrimPrefix(line, endPrefix), markerSfx)
-	return strings.TrimSpace(inner), true
+	inner := strings.TrimSpace(strings.TrimSuffix(strings.TrimPrefix(line, endPrefix), markerSfx))
+	if !qualifiedRE.MatchString(inner) {
+		return "", false
+	}
+	return inner, true
 }
 
 func splitLines(b []byte) []string {
