@@ -35,16 +35,6 @@ func ParseContract(body []byte) ([]MarkedBlock, error) {
 	for i < len(lines) {
 		line := lines[i]
 		trimmed := strings.TrimSpace(line)
-		if strings.HasPrefix(trimmed, beginPrefix) {
-			if _, ok := parseBegin(line); !ok {
-				return nil, fmt.Errorf("invalid BEGIN marker at line %d: expected <store>:<path>, got: %s", i+1, trimmed)
-			}
-		}
-		if strings.HasPrefix(trimmed, endPrefix) {
-			if _, ok := parseEnd(line); !ok {
-				return nil, fmt.Errorf("invalid END marker at line %d: expected <store>:<path>, got: %s", i+1, trimmed)
-			}
-		}
 		if path, ok := parseBegin(line); ok {
 			end := -1
 			for j := i + 1; j < len(lines); j++ {
@@ -55,8 +45,8 @@ func ParseContract(body []byte) ([]MarkedBlock, error) {
 					end = j
 					break
 				}
-				if _, ok := parseBegin(lines[j]); ok {
-					return nil, fmt.Errorf("nested BEGIN union:%s inside BEGIN union:%s (line %d)", parseBeginPath(lines[j]), path, j+1)
+				if np, ok := parseBegin(lines[j]); ok {
+					return nil, fmt.Errorf("nested BEGIN union:%s inside BEGIN union:%s (line %d)", np, path, j+1)
 				}
 			}
 			if end == -1 {
@@ -67,8 +57,14 @@ func ParseContract(body []byte) ([]MarkedBlock, error) {
 			i = end + 1
 			continue
 		}
+		if strings.HasPrefix(trimmed, beginPrefix) {
+			return nil, fmt.Errorf("invalid BEGIN marker at line %d: expected <store>:<path>, got: %s", i+1, trimmed)
+		}
 		if path, ok := parseEnd(line); ok {
 			return nil, fmt.Errorf("orphan END union:%s at line %d", path, i+1)
+		}
+		if strings.HasPrefix(trimmed, endPrefix) {
+			return nil, fmt.Errorf("invalid END marker at line %d: expected <store>:<path>, got: %s", i+1, trimmed)
 		}
 		i++
 	}
@@ -163,11 +159,6 @@ func parseBegin(line string) (string, bool) {
 		return "", false
 	}
 	return inner, true
-}
-
-func parseBeginPath(line string) string {
-	p, _ := parseBegin(line)
-	return p
 }
 
 func parseEnd(line string) (string, bool) {
