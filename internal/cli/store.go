@@ -154,9 +154,153 @@ func shopsReferencingStore(storeName string) ([]string, error) {
 	return hits, nil
 }
 
-// Stubs filled in by Tasks 11 (remote) and 12 (push/pull/fetch/status).
-func newStoreRemoteCmd() *cobra.Command { return &cobra.Command{Use: "remote", Short: "stub"} }
-func newStorePushCmd() *cobra.Command   { return &cobra.Command{Use: "push", Short: "stub"} }
-func newStorePullCmd() *cobra.Command   { return &cobra.Command{Use: "pull", Short: "stub"} }
-func newStoreFetchCmd() *cobra.Command  { return &cobra.Command{Use: "fetch", Short: "stub"} }
-func newStoreStatusCmd() *cobra.Command { return &cobra.Command{Use: "status", Short: "stub"} }
+func newStoreRemoteCmd() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "remote",
+		Short: "Manage a store's git remotes.",
+	}
+	cmd.AddCommand(
+		&cobra.Command{
+			Use:   "add <store> <name> <url>",
+			Short: "Add a git remote to the store.",
+			Args:  cobra.ExactArgs(3),
+			RunE: func(cmd *cobra.Command, args []string) error {
+				s, err := openStoreByName(args[0])
+				if err != nil {
+					return err
+				}
+				return s.RemoteAdd(args[1], args[2])
+			},
+		},
+		&cobra.Command{
+			Use:   "remove <store> <name>",
+			Short: "Remove a git remote from the store.",
+			Args:  cobra.ExactArgs(2),
+			RunE: func(cmd *cobra.Command, args []string) error {
+				s, err := openStoreByName(args[0])
+				if err != nil {
+					return err
+				}
+				return s.RemoteRemove(args[1])
+			},
+		},
+		&cobra.Command{
+			Use:   "list <store>",
+			Short: "List git remotes for the store.",
+			Args:  cobra.ExactArgs(1),
+			RunE: func(cmd *cobra.Command, args []string) error {
+				s, err := openStoreByName(args[0])
+				if err != nil {
+					return err
+				}
+				rs, err := s.Remotes()
+				if err != nil {
+					return err
+				}
+				for _, r := range rs {
+					fmt.Fprintf(cmd.OutOrStdout(), "%s\t%s\n", r.Name, r.URL)
+				}
+				return nil
+			},
+		},
+	)
+	return cmd
+}
+
+func newStorePushCmd() *cobra.Command {
+	return &cobra.Command{
+		Use:   "push <store> [remote] [branch]",
+		Short: "git push in the store's repo.",
+		Args:  cobra.RangeArgs(1, 3),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			s, err := openStoreByName(args[0])
+			if err != nil {
+				return err
+			}
+			var remote, branch string
+			if len(args) > 1 {
+				remote = args[1]
+			}
+			if len(args) > 2 {
+				branch = args[2]
+			}
+			return s.Push(remote, branch)
+		},
+	}
+}
+
+func newStorePullCmd() *cobra.Command {
+	return &cobra.Command{
+		Use:   "pull <store> [remote] [branch]",
+		Short: "git pull --rebase in the store's repo.",
+		Args:  cobra.RangeArgs(1, 3),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			s, err := openStoreByName(args[0])
+			if err != nil {
+				return err
+			}
+			var remote, branch string
+			if len(args) > 1 {
+				remote = args[1]
+			}
+			if len(args) > 2 {
+				branch = args[2]
+			}
+			return s.Pull(remote, branch)
+		},
+	}
+}
+
+func newStoreFetchCmd() *cobra.Command {
+	return &cobra.Command{
+		Use:   "fetch <store> [remote]",
+		Short: "git fetch in the store's repo.",
+		Args:  cobra.RangeArgs(1, 2),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			s, err := openStoreByName(args[0])
+			if err != nil {
+				return err
+			}
+			remote := ""
+			if len(args) > 1 {
+				remote = args[1]
+			}
+			return s.Fetch(remote)
+		},
+	}
+}
+
+func newStoreStatusCmd() *cobra.Command {
+	return &cobra.Command{
+		Use:   "status <store>",
+		Short: "git status --short --branch for the store.",
+		Args:  cobra.ExactArgs(1),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			s, err := openStoreByName(args[0])
+			if err != nil {
+				return err
+			}
+			out, err := s.Status()
+			if err != nil {
+				return err
+			}
+			fmt.Fprint(cmd.OutOrStdout(), out)
+			return nil
+		},
+	}
+}
+
+func openStoreByName(name string) (*unionstore.Store, error) {
+	if err := qpath.ValidateStoreName(name); err != nil {
+		return nil, err
+	}
+	unionDir, err := paths.UnionDir()
+	if err != nil {
+		return nil, err
+	}
+	s, err := unionstore.OpenNamed(unionDir, name)
+	if err != nil {
+		return nil, fmt.Errorf("no such store: %s", name)
+	}
+	return s, nil
+}
