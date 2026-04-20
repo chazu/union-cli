@@ -9,13 +9,6 @@ import (
 	"testing"
 )
 
-// e2e tests exercise the full command flow by invoking the cobra root command
-// directly and by setting up a temp $UNION_DIR and temp shop dir. The editor
-// is faked via $VISUAL=true so `edit` reads whatever we pre-seeded into the
-// editor-temp file by a custom wrapper script.
-//
-// We skip these tests when git is unavailable since the store depends on it.
-
 func requireGit(t *testing.T) {
 	t.Helper()
 	if _, err := exec.LookPath("git"); err != nil {
@@ -34,93 +27,167 @@ func runRoot(t *testing.T, args ...string) (string, error) {
 	return buf.String(), err
 }
 
-func TestE2E_FullFlowPropagates(t *testing.T) {
+func TestE2E_InitCreatesDefaultStore(t *testing.T) {
+	requireGit(t)
+	unionDir := t.TempDir()
+	t.Setenv("UNION_DIR", unionDir)
+
+	if out, err := runRoot(t, "init"); err != nil {
+		t.Fatalf("init: %v\n%s", err, out)
+	}
+	if _, err := os.Stat(filepath.Join(unionDir, "stores", "default", ".git")); err != nil {
+		t.Fatalf("default store missing: %v", err)
+	}
+}
+
+func TestE2E_FullFlowPropagatesAcrossStores(t *testing.T) {
 	requireGit(t)
 
 	unionDir := t.TempDir()
 	shopDir := t.TempDir()
 	t.Setenv("UNION_DIR", unionDir)
 
-	// init
-	if out, err := runRoot(t, "init"); err != nil {
-		t.Fatalf("init: %v\n%s", err, out)
+	if _, err := runRoot(t, "init"); err != nil {
+		t.Fatalf("init: %v", err)
+	}
+	if _, err := runRoot(t, "store", "add", "personal"); err != nil {
+		t.Fatalf("store add personal: %v", err)
 	}
 
-	// new via -f file
-	clauseFile := filepath.Join(t.TempDir(), "clause.md")
-	if err := os.WriteFile(clauseFile, []byte("be helpful\n"), 0o644); err != nil {
-		t.Fatalf("seed clause file: %v", err)
+	a := filepath.Join(t.TempDir(), "a.md")
+	b := filepath.Join(t.TempDir(), "b.md")
+	if err := os.WriteFile(a, []byte("be helpful\n"), 0o644); err != nil {
+		t.Fatal(err)
 	}
-	if out, err := runRoot(t, "new", "base/identity", "-f", clauseFile); err != nil {
-		t.Fatalf("new: %v\n%s", err, out)
+	if err := os.WriteFile(b, []byte("voice is terse\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := runRoot(t, "new", "default:base/identity", "-f", a); err != nil {
+		t.Fatalf("new default: %v", err)
+	}
+	if _, err := runRoot(t, "new", "personal:writing/voice", "-f", b); err != nil {
+		t.Fatalf("new personal: %v", err)
 	}
 
-	// organize the temp shop
-	if out, err := runRoot(t, "organize", shopDir); err != nil {
-		t.Fatalf("organize: %v\n%s", err, out)
+	if _, err := runRoot(t, "organize", shopDir); err != nil {
+		t.Fatalf("organize: %v", err)
 	}
-
-	// ratify requires cwd == shopDir; chdir
-	origWD, err := os.Getwd()
-	if err != nil {
-		t.Fatalf("getwd: %v", err)
-	}
+	origWD, _ := os.Getwd()
 	if err := os.Chdir(shopDir); err != nil {
 		t.Fatalf("chdir: %v", err)
 	}
 	defer os.Chdir(origWD)
 
-	if out, err := runRoot(t, "ratify", "base/identity"); err != nil {
-		t.Fatalf("ratify: %v\n%s", err, out)
+	if _, err := runRoot(t, "ratify", "default:base/identity"); err != nil {
+		t.Fatalf("ratify default: %v", err)
+	}
+	if _, err := runRoot(t, "ratify", "personal:writing/voice"); err != nil {
+		t.Fatalf("ratify personal: %v", err)
 	}
 
 	contractPath := filepath.Join(shopDir, "AGENTS.md")
-	got, err := os.ReadFile(contractPath)
-	if err != nil {
-		t.Fatalf("read contract: %v", err)
+	got, _ := os.ReadFile(contractPath)
+	if !strings.Contains(string(got), "<!-- BEGIN union:default:base/identity -->") {
+		t.Errorf("missing default marker:\n%s", got)
 	}
-	if !strings.Contains(string(got), "<!-- BEGIN union:base/identity -->") {
-		t.Errorf("contract missing BEGIN marker:\n%s", got)
-	}
-	if !strings.Contains(string(got), "be helpful") {
-		t.Errorf("contract missing clause body:\n%s", got)
+	if !strings.Contains(string(got), "<!-- BEGIN union:personal:writing/voice -->") {
+		t.Errorf("missing personal marker:\n%s", got)
 	}
 
-	// Simulate an edit: directly Put new content into the store, then call
-	// propagateUpdate the same way edit.go does. (We avoid driving $EDITOR in
-	// this test — the editor integration is exercised manually.)
-	newBody := []byte("BE EXTRA HELPFUL\n")
-	s, err := openStore()
-	if err != nil {
-		t.Fatalf("openStore: %v", err)
-	}
-	if err := s.Put("base/identity", newBody, "edit base/identity"); err != nil {
-		t.Fatalf("Put: %v", err)
-	}
-	if err := propagateUpdate(&bytes.Buffer{}, "base/identity", newBody); err != nil {
-		t.Fatalf("propagateUpdate: %v", err)
-	}
-	got, err = os.ReadFile(contractPath)
-	if err != nil {
-		t.Fatalf("read contract after edit: %v", err)
-	}
-	if !strings.Contains(string(got), "BE EXTRA HELPFUL") {
-		t.Errorf("contract did not propagate edit:\n%s", got)
-	}
-	if strings.Contains(string(got), "be helpful\n") && !strings.Contains(string(got), "BE EXTRA") {
-		t.Errorf("old content still present:\n%s", got)
+	if _, err := runRoot(t, "new", "default:base/identity", "-f", a); err == nil {
+		t.Fatal("re-'new' should fail; clause already exists")
 	}
 
-	// expel → contract block should be gone.
-	if out, err := runRoot(t, "expel", "base/identity"); err != nil {
-		t.Fatalf("expel: %v\n%s", err, out)
-	}
-	got, err = os.ReadFile(contractPath)
+	out, err := runRoot(t, "show", "personal:writing/voice")
 	if err != nil {
-		t.Fatalf("read contract after expel: %v", err)
+		t.Fatalf("show: %v", err)
 	}
-	if strings.Contains(string(got), "<!-- BEGIN union:base/identity -->") {
-		t.Errorf("contract still contains marker after expel:\n%s", got)
+	if !strings.Contains(out, "voice is terse") {
+		t.Errorf("show returned %q", out)
+	}
+
+	if _, err := runRoot(t, "expel", "personal:writing/voice"); err != nil {
+		t.Fatalf("expel: %v", err)
+	}
+	got, _ = os.ReadFile(contractPath)
+	if strings.Contains(string(got), "<!-- BEGIN union:personal:writing/voice -->") {
+		t.Errorf("personal marker still present after expel:\n%s", got)
+	}
+	if !strings.Contains(string(got), "<!-- BEGIN union:default:base/identity -->") {
+		t.Errorf("default marker was wrongly removed:\n%s", got)
+	}
+}
+
+func TestE2E_StoreRemoveRefusedWhenRatified(t *testing.T) {
+	requireGit(t)
+
+	unionDir := t.TempDir()
+	shopDir := t.TempDir()
+	t.Setenv("UNION_DIR", unionDir)
+
+	if _, err := runRoot(t, "init"); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := runRoot(t, "store", "add", "work"); err != nil {
+		t.Fatal(err)
+	}
+	f := filepath.Join(t.TempDir(), "x.md")
+	os.WriteFile(f, []byte("x\n"), 0o644)
+	if _, err := runRoot(t, "new", "work:ops/deploy", "-f", f); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := runRoot(t, "organize", shopDir); err != nil {
+		t.Fatal(err)
+	}
+	origWD, _ := os.Getwd()
+	os.Chdir(shopDir)
+	defer os.Chdir(origWD)
+	if _, err := runRoot(t, "ratify", "work:ops/deploy"); err != nil {
+		t.Fatal(err)
+	}
+	_, err := runRoot(t, "store", "remove", "work")
+	if err == nil {
+		t.Fatal("expected store remove to be refused")
+	}
+	if !strings.Contains(err.Error(), "still ratified") {
+		t.Errorf("expected 'still ratified' in error, got: %v", err)
+	}
+}
+
+func TestE2E_StoreRemotePushPull(t *testing.T) {
+	requireGit(t)
+
+	unionDir := t.TempDir()
+	t.Setenv("UNION_DIR", unionDir)
+
+	if _, err := runRoot(t, "init"); err != nil {
+		t.Fatal(err)
+	}
+
+	remote := t.TempDir()
+	cmd := exec.Command("git", "init", "--bare", "-q", remote)
+	if out, err := cmd.CombinedOutput(); err != nil {
+		t.Fatalf("bare init: %v\n%s", err, out)
+	}
+
+	if _, err := runRoot(t, "store", "remote", "add", "default", "origin", remote); err != nil {
+		t.Fatalf("remote add: %v", err)
+	}
+	out, err := runRoot(t, "store", "remote", "list", "default")
+	if err != nil {
+		t.Fatalf("remote list: %v", err)
+	}
+	if !strings.Contains(out, "origin") {
+		t.Errorf("remote list missing origin:\n%s", out)
+	}
+
+	f := filepath.Join(t.TempDir(), "c.md")
+	os.WriteFile(f, []byte("hi\n"), 0o644)
+	if _, err := runRoot(t, "new", "default:c/d", "-f", f); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := runRoot(t, "store", "push", "default", "origin"); err != nil {
+		t.Fatalf("push: %v", err)
 	}
 }
 
@@ -132,19 +199,19 @@ func TestE2E_RatifyRequiresOrganizedShop(t *testing.T) {
 	t.Setenv("UNION_DIR", unionDir)
 
 	if _, err := runRoot(t, "init"); err != nil {
-		t.Fatalf("init: %v", err)
+		t.Fatal(err)
 	}
-	if _, err := runRoot(t, "new", "-f", "/dev/null", "x/y"); err != nil {
-		t.Fatalf("new: %v", err)
+	f := filepath.Join(t.TempDir(), "y.md")
+	os.WriteFile(f, []byte("y"), 0o644)
+	if _, err := runRoot(t, "new", "default:x/y", "-f", f); err != nil {
+		t.Fatal(err)
 	}
 
 	origWD, _ := os.Getwd()
-	if err := os.Chdir(notAShop); err != nil {
-		t.Fatalf("chdir: %v", err)
-	}
+	os.Chdir(notAShop)
 	defer os.Chdir(origWD)
 
-	_, err := runRoot(t, "ratify", "x/y")
+	_, err := runRoot(t, "ratify", "default:x/y")
 	if err == nil {
 		t.Fatal("expected ratify to fail in non-organized shop")
 	}
