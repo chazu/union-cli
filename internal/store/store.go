@@ -7,12 +7,20 @@ package store
 import (
 	"bytes"
 	"fmt"
+	"io"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"regexp"
 	"sort"
 	"strings"
+)
+
+// streamOut and streamErr are the sinks for gitStream. Overridable by tests
+// to silence git progress output and enable capture.
+var (
+	streamOut io.Writer = os.Stdout
+	streamErr io.Writer = os.Stderr
 )
 
 const clauseExt = ".md"
@@ -301,6 +309,10 @@ func (s *Store) Remotes() ([]Remote, error) {
 		if len(fields) < 2 {
 			continue
 		}
+		// Prefer the fetch URL when fetch and push URLs differ.
+		if _, ok := seen[fields[0]]; ok && !(len(fields) >= 3 && fields[2] == "(fetch)") {
+			continue
+		}
 		seen[fields[0]] = fields[1]
 	}
 	var rs []Remote
@@ -381,8 +393,8 @@ func (s *Store) gitCapture(args ...string) (string, error) {
 func (s *Store) gitStream(args ...string) error {
 	cmd := exec.Command("git", args...)
 	cmd.Dir = s.root
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
+	cmd.Stdout = streamOut
+	cmd.Stderr = streamErr
 	if err := cmd.Run(); err != nil {
 		return fmt.Errorf("git %s: %w", strings.Join(args, " "), err)
 	}

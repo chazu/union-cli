@@ -1,6 +1,7 @@
 package store
 
 import (
+	"io"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -8,6 +9,13 @@ import (
 	"strings"
 	"testing"
 )
+
+func quietStreams(t *testing.T) {
+	t.Helper()
+	prevOut, prevErr := streamOut, streamErr
+	streamOut, streamErr = io.Discard, io.Discard
+	t.Cleanup(func() { streamOut, streamErr = prevOut, prevErr })
+}
 
 func requireGit(t *testing.T) {
 	t.Helper()
@@ -254,6 +262,7 @@ func TestRemoteAddListRemove(t *testing.T) {
 }
 
 func TestPushPullRoundTrip(t *testing.T) {
+	quietStreams(t)
 	s := newTestStore(t)
 	remote := bareRepo(t)
 	if err := s.RemoteAdd("origin", remote); err != nil {
