@@ -6,7 +6,7 @@ GOBIN := $(shell go env GOPATH)/bin
 endif
 CODESIGN_IDENTITY ?= -
 
-.PHONY: build install codesign clean
+.PHONY: build install codesign clean test vet
 
 build:
 	go build -o $(BINARY) $(PKG)
@@ -18,6 +18,12 @@ install:
 
 codesign:
 	codesign --force --sign $(CODESIGN_IDENTITY) $(GOBIN)/$(BINARY)
+
+test:
+	go test ./...
+
+vet:
+	go vet ./...
 
 clean:
 	rm -f $(BINARY)
