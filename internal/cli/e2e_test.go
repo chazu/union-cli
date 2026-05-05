@@ -75,11 +75,7 @@ func TestE2E_FullFlowPropagatesAcrossStores(t *testing.T) {
 	if _, err := runRoot(t, "organize", shopDir); err != nil {
 		t.Fatalf("organize: %v", err)
 	}
-	origWD, _ := os.Getwd()
-	if err := os.Chdir(shopDir); err != nil {
-		t.Fatalf("chdir: %v", err)
-	}
-	defer os.Chdir(origWD)
+	t.Chdir(shopDir)
 
 	if _, err := runRoot(t, "ratify", "default:base/identity"); err != nil {
 		t.Fatalf("ratify default: %v", err)
@@ -142,9 +138,7 @@ func TestE2E_StoreRemoveRefusedWhenRatified(t *testing.T) {
 	if _, err := runRoot(t, "organize", shopDir); err != nil {
 		t.Fatal(err)
 	}
-	origWD, _ := os.Getwd()
-	os.Chdir(shopDir)
-	defer os.Chdir(origWD)
+	t.Chdir(shopDir)
 	if _, err := runRoot(t, "ratify", "work:ops/deploy"); err != nil {
 		t.Fatal(err)
 	}
@@ -210,9 +204,7 @@ func TestE2E_RatifyRequiresOrganizedShop(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	origWD, _ := os.Getwd()
-	os.Chdir(notAShop)
-	defer os.Chdir(origWD)
+	t.Chdir(notAShop)
 
 	_, err := runRoot(t, "ratify", "default:x/y")
 	if err == nil {
@@ -251,9 +243,7 @@ func TestE2E_EditPropagatesAcrossStoresIsolated(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	origWD, _ := os.Getwd()
-	os.Chdir(shopDir)
-	defer os.Chdir(origWD)
+	t.Chdir(shopDir)
 
 	if _, err := runRoot(t, "ratify", "default:x/a"); err != nil {
 		t.Fatal(err)
