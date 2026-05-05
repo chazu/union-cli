@@ -5,6 +5,7 @@ package shop
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 	"sort"
 
 	"github.com/BurntSushi/toml"
@@ -90,23 +91,39 @@ func (r *Registry) List() []Shop {
 	return out
 }
 
-// Save writes the registry to disk.
+// Save writes the registry to disk atomically (write-then-rename).
 func (r *Registry) Save() error {
 	t := tomlShops{Shops: map[string]tomlShop{}}
 	for dir, s := range r.shops {
 		t.Shops[dir] = tomlShop{Contract: s.Contract}
 	}
-	f, err := os.Create(r.path)
+
+	// Write to a temp file in the same directory so os.Rename is atomic.
+	dir := filepath.Dir(r.path)
+	tmp, err := os.CreateTemp(dir, ".shops-*.toml.tmp")
 	if err != nil {
-		return fmt.Errorf("create shops.toml: %w", err)
+		return fmt.Errorf("create temp shops.toml: %w", err)
 	}
-	defer f.Close()
-	if _, err := f.WriteString("# union shops registry\n"); err != nil {
+	tmpPath := tmp.Name()
+
+	if _, err := tmp.WriteString("# union shops registry\n"); err != nil {
+		tmp.Close()
+		os.Remove(tmpPath)
 		return err
 	}
-	enc := toml.NewEncoder(f)
+	enc := toml.NewEncoder(tmp)
 	if err := enc.Encode(t); err != nil {
+		tmp.Close()
+		os.Remove(tmpPath)
 		return fmt.Errorf("encode shops.toml: %w", err)
+	}
+	if err := tmp.Close(); err != nil {
+		os.Remove(tmpPath)
+		return fmt.Errorf("flush shops.toml: %w", err)
+	}
+	if err := os.Rename(tmpPath, r.path); err != nil {
+		os.Remove(tmpPath)
+		return fmt.Errorf("rename shops.toml: %w", err)
 	}
 	return nil
 }
