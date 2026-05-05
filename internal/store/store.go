@@ -11,11 +11,11 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
-	"regexp"
 	"sort"
 	"strings"
 
 	"github.com/chazu/union/internal/paths"
+	"github.com/chazu/union/internal/qpath"
 )
 
 // streamOut and streamErr are the sinks for gitStream. Overridable by tests
@@ -203,24 +203,8 @@ func (s *Store) hasStagedChanges() (bool, error) {
 	return false, fmt.Errorf("git diff --cached: %w", err)
 }
 
-func validatePath(p string) error {
-	if p == "" {
-		return fmt.Errorf("clause path is empty")
-	}
-	if strings.HasPrefix(p, "/") {
-		return fmt.Errorf("clause path must be relative: %q", p)
-	}
-	if strings.Contains(p, "..") {
-		return fmt.Errorf("clause path may not contain '..': %q", p)
-	}
-	if strings.Contains(p, " ") {
-		return fmt.Errorf("clause path may not contain spaces: %q", p)
-	}
-	if strings.Contains(p, "//") {
-		return fmt.Errorf("clause path may not contain '//': %q", p)
-	}
-	return nil
-}
+// validatePath delegates to the canonical qpath.ValidateClausePath.
+var validatePath = qpath.ValidateClausePath
 
 // InitNamed creates $unionDir/stores/<name>/ and initializes it as a store.
 func InitNamed(unionDir, name string) (*Store, error) {
@@ -269,16 +253,8 @@ func ListStores(unionDir string) ([]string, error) {
 	return out, nil
 }
 
-// validateStoreName mirrors qpath.ValidateStoreName without importing qpath
-// (keeping the store package free of higher-level dependencies).
-var storeNameRE = regexp.MustCompile(`^[a-z0-9][a-z0-9_-]*$`)
-
-func validateStoreName(name string) error {
-	if !storeNameRE.MatchString(name) {
-		return fmt.Errorf("invalid store name %q: must match [a-z0-9][a-z0-9_-]*", name)
-	}
-	return nil
-}
+// validateStoreName delegates to the canonical qpath.ValidateStoreName.
+var validateStoreName = qpath.ValidateStoreName
 
 // Remote is a name/URL pair.
 type Remote struct {
