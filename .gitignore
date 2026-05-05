@@ -1,3 +1,4 @@
 /union
 *.test
+*.cov
 .DS_Store
