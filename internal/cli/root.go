@@ -13,10 +13,14 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// Version is set at build time via -ldflags.
+var Version = "dev"
+
 func newRootCmd() *cobra.Command {
 	root := &cobra.Command{
 		Use:           "union",
 		Short:         "Composable, versioned AGENTS.md snippet management.",
+		Version:       Version,
 		SilenceUsage:  true,
 		SilenceErrors: true,
 	}
