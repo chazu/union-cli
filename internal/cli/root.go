@@ -47,6 +47,9 @@ func newRootCmd() *cobra.Command {
 		newRenameCmd(),
 		newStatusCmd(),
 		newCompletionCmd(),
+		newHarnessCmd(),
+		newEmitCmd(),
+		newImportCmd(),
 	)
 	return root
 }
