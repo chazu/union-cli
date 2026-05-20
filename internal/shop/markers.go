@@ -71,8 +71,24 @@ func ParseContract(body []byte) ([]MarkedBlock, error) {
 	return blocks, nil
 }
 
+// validateClauseBody rejects body text that contains union marker strings,
+// which would corrupt contract parsing if inserted.
+func validateClauseBody(body []byte) error {
+	s := string(body)
+	if strings.Contains(s, beginPrefix) {
+		return fmt.Errorf("clause body contains a union BEGIN marker — this would corrupt the contract")
+	}
+	if strings.Contains(s, endPrefix) {
+		return fmt.Errorf("clause body contains a union END marker — this would corrupt the contract")
+	}
+	return nil
+}
+
 // InsertClause appends a marked block for path. No-op if already present.
 func InsertClause(contract []byte, path string, body []byte) ([]byte, error) {
+	if err := validateClauseBody(body); err != nil {
+		return nil, err
+	}
 	if HasClause(contract, path) {
 		return append([]byte(nil), contract...), nil
 	}
@@ -97,6 +113,9 @@ func InsertClause(contract []byte, path string, body []byte) ([]byte, error) {
 
 // UpdateClause replaces the body of the marked block for path.
 func UpdateClause(contract []byte, path string, body []byte) ([]byte, error) {
+	if err := validateClauseBody(body); err != nil {
+		return nil, err
+	}
 	blocks, err := ParseContract(contract)
 	if err != nil {
 		return nil, err

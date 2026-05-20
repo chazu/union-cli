@@ -10,13 +10,6 @@ import (
 	"testing"
 )
 
-func quietStreams(t *testing.T) {
-	t.Helper()
-	prevOut, prevErr := streamOut, streamErr
-	streamOut, streamErr = io.Discard, io.Discard
-	t.Cleanup(func() { streamOut, streamErr = prevOut, prevErr })
-}
-
 func requireGit(t *testing.T) {
 	t.Helper()
 	if _, err := exec.LookPath("git"); err != nil {
@@ -32,6 +25,7 @@ func newTestStore(t *testing.T) *Store {
 	if err != nil {
 		t.Fatalf("Init: %v", err)
 	}
+	s.SetStreams(io.Discard, io.Discard)
 	return s
 }
 
@@ -262,7 +256,6 @@ func TestRemoteAddListRemove(t *testing.T) {
 }
 
 func TestPushPullRoundTrip(t *testing.T) {
-	quietStreams(t)
 	s := newTestStore(t)
 	remote := bareRepo(t)
 	if err := s.RemoteAdd("origin", remote); err != nil {

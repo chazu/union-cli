@@ -38,6 +38,15 @@ func newRootCmd() *cobra.Command {
 		newStrikeCmd(),
 		newContractCmd(),
 		newStoreCmd(),
+		newWhichCmd(),
+		newVerifyCmd(),
+		newSyncCmd(),
+		newLogCmd(),
+		newSearchCmd(),
+		newOrphansCmd(),
+		newRenameCmd(),
+		newStatusCmd(),
+		newCompletionCmd(),
 	)
 	return root
 }

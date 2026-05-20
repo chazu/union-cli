@@ -71,8 +71,18 @@ union ratify personal:writing/voice
 | `union store remote list <store>` | List a store's remotes |
 | `union store push <store> [remote] [branch]` | `git push` in a store |
 | `union store pull <store> [remote] [branch]` | `git pull --rebase` in a store |
+| `union store clone <url> [name]` | Clone a remote repo as a new store |
 | `union store fetch <store> [remote]` | `git fetch` in a store |
 | `union store status <store>` | `git status --short --branch` for a store |
+| `union rename <old> <new>` | Rename clause within same store; rewrites all shop markers |
+| `union verify` | Check all shops' contracts match their store clauses (CI-friendly) |
+| `union sync` | Re-propagate all clauses to all shops (repair drift) |
+| `union status` | Show global summary: stores, clauses, shops |
+| `union search <pattern>` | Search clause bodies for a substring |
+| `union log <store:path>` | Show git log for a clause |
+| `union orphans` | List clauses not ratified by any shop |
+| `union which` | Print union paths for debugging |
+| `union completion bash\|zsh\|fish` | Generate shell completions |
 
 ## Contract markers
 

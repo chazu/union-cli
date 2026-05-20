@@ -5,6 +5,7 @@ import (
 	"os"
 	"path/filepath"
 	"sort"
+	"strings"
 
 	"github.com/chazu/union/internal/paths"
 	"github.com/chazu/union/internal/qpath"
@@ -22,6 +23,7 @@ func newStoreCmd() *cobra.Command {
 		newStoreAddCmd(),
 		newStoreListCmd(),
 		newStoreRemoveCmd(),
+		newStoreCloneCmd(),
 		newStoreRemoteCmd(),
 		newStorePushCmd(),
 		newStorePullCmd(),
@@ -57,6 +59,50 @@ func newStoreAddCmd() *cobra.Command {
 			return nil
 		},
 	}
+}
+
+func newStoreCloneCmd() *cobra.Command {
+	return &cobra.Command{
+		Use:   "clone <url> [name]",
+		Short: "Clone a remote git repo as a new store.",
+		Args:  cobra.RangeArgs(1, 2),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			url := args[0]
+			name := ""
+			if len(args) > 1 {
+				name = args[1]
+			} else {
+				name = inferStoreName(url)
+			}
+			if err := qpath.ValidateStoreName(name); err != nil {
+				return fmt.Errorf("inferred store name %q is invalid: %w (specify a name explicitly)", name, err)
+			}
+			unionDir, err := paths.UnionDir()
+			if err != nil {
+				return err
+			}
+			dir := filepath.Join(unionDir, paths.StoresSubdir, name)
+			if _, err := os.Stat(dir); err == nil {
+				return fmt.Errorf("store already exists: %s", name)
+			}
+			if err := os.MkdirAll(filepath.Dir(dir), 0o755); err != nil {
+				return err
+			}
+			s, err := unionstore.CloneNamed(unionDir, name, url)
+			if err != nil {
+				return err
+			}
+			fmt.Fprintf(cmd.OutOrStdout(), "cloned store %q from %s at %s\n", name, url, s.Root())
+			return nil
+		},
+	}
+}
+
+func inferStoreName(url string) string {
+	base := filepath.Base(url)
+	base = strings.TrimSuffix(base, ".git")
+	base = strings.ToLower(base)
+	return base
 }
 
 func newStoreListCmd() *cobra.Command {

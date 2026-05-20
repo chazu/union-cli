@@ -18,18 +18,13 @@ import (
 	"github.com/chazu/union/internal/qpath"
 )
 
-// streamOut and streamErr are the sinks for gitStream. Overridable by tests
-// to silence git progress output and enable capture.
-var (
-	streamOut io.Writer = os.Stdout
-	streamErr io.Writer = os.Stderr
-)
-
 const clauseExt = ".md"
 
 // Store is a handle to a union clause store rooted at a directory.
 type Store struct {
-	root string // $UNION_DIR
+	root      string
+	streamOut io.Writer
+	streamErr io.Writer
 }
 
 // Init creates a new store at dir. dir must not already contain a .git.
@@ -44,7 +39,7 @@ func Init(dir string) (*Store, error) {
 	if err := os.WriteFile(filepath.Join(clausesDir, ".gitkeep"), nil, 0o644); err != nil {
 		return nil, fmt.Errorf("seed .gitkeep: %w", err)
 	}
-	s := &Store{root: dir}
+	s := &Store{root: dir, streamOut: os.Stdout, streamErr: os.Stderr}
 	if err := s.git("init", "-q"); err != nil {
 		return nil, fmt.Errorf("git init: %w", err)
 	}
@@ -62,11 +57,18 @@ func Open(dir string) (*Store, error) {
 	if _, err := os.Stat(filepath.Join(dir, ".git")); err != nil {
 		return nil, fmt.Errorf("no union store at %s: run 'union init'", dir)
 	}
-	return &Store{root: dir}, nil
+	return &Store{root: dir, streamOut: os.Stdout, streamErr: os.Stderr}, nil
 }
 
 // Root returns the store's root directory.
 func (s *Store) Root() string { return s.root }
+
+// SetStreams overrides the stdout/stderr sinks used by long-running git
+// operations (push, pull, fetch). Intended for tests.
+func (s *Store) SetStreams(out, err io.Writer) {
+	s.streamOut = out
+	s.streamErr = err
+}
 
 // Put writes body at logical path and commits with msg. Creates dirs as needed.
 func (s *Store) Put(path string, body []byte, msg string) error {
@@ -216,6 +218,21 @@ func InitNamed(unionDir, name string) (*Store, error) {
 		return nil, fmt.Errorf("create store dir: %w", err)
 	}
 	return Init(dir)
+}
+
+// CloneNamed clones a remote repo into $unionDir/stores/<name>/ and opens it.
+func CloneNamed(unionDir, name, url string) (*Store, error) {
+	if err := validateStoreName(name); err != nil {
+		return nil, err
+	}
+	dir := filepath.Join(unionDir, paths.StoresSubdir, name)
+	cmd := exec.Command("git", "clone", url, dir)
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	if err := cmd.Run(); err != nil {
+		return nil, fmt.Errorf("git clone: %w", err)
+	}
+	return Open(dir)
 }
 
 // OpenNamed opens the store at $unionDir/stores/<name>/.
@@ -371,8 +388,8 @@ func (s *Store) gitCapture(args ...string) (string, error) {
 func (s *Store) gitStream(args ...string) error {
 	cmd := exec.Command("git", args...)
 	cmd.Dir = s.root
-	cmd.Stdout = streamOut
-	cmd.Stderr = streamErr
+	cmd.Stdout = s.streamOut
+	cmd.Stderr = s.streamErr
 	if err := cmd.Run(); err != nil {
 		return fmt.Errorf("git %s: %w", strings.Join(args, " "), err)
 	}

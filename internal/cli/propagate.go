@@ -50,6 +50,7 @@ func eachRatifiedShop(w io.Writer, clausePath string, fn rewriteFn) error {
 		body, err := os.ReadFile(contractPath)
 		if err != nil {
 			if os.IsNotExist(err) {
+				fmt.Fprintf(w, "  warn: %s missing, skipping\n", contractPath)
 				continue
 			}
 			failures = append(failures, fmt.Errorf("%s: %w", contractPath, err))

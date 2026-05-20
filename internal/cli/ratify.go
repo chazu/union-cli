@@ -11,9 +11,10 @@ import (
 
 func newRatifyCmd() *cobra.Command {
 	return &cobra.Command{
-		Use:   "ratify <path>",
-		Short: "Add a clause to this shop's contract.",
-		Args:  cobra.ExactArgs(1),
+		Use:               "ratify <path>",
+		Short:             "Add a clause to this shop's contract.",
+		Args:              cobra.ExactArgs(1),
+		ValidArgsFunction: completeClausePath,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			q, err := qpath.Parse(args[0])
 			if err != nil {

@@ -11,9 +11,10 @@ import (
 
 func newStrikeCmd() *cobra.Command {
 	return &cobra.Command{
-		Use:   "strike <path>",
-		Short: "Remove a clause from this shop's contract.",
-		Args:  cobra.ExactArgs(1),
+		Use:               "strike <path>",
+		Short:             "Remove a clause from this shop's contract.",
+		Args:              cobra.ExactArgs(1),
+		ValidArgsFunction: completeClausePath,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			q, err := qpath.Parse(args[0])
 			if err != nil {

@@ -7,9 +7,10 @@ import (
 
 func newShowCmd() *cobra.Command {
 	return &cobra.Command{
-		Use:   "show <path>",
-		Short: "Print a clause's content.",
-		Args:  cobra.ExactArgs(1),
+		Use:               "show <path>",
+		Short:             "Print a clause's content.",
+		Args:              cobra.ExactArgs(1),
+		ValidArgsFunction: completeClausePath,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			q, err := qpath.Parse(args[0])
 			if err != nil {

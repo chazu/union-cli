@@ -170,6 +170,23 @@ func TestRemoveClause_Missing(t *testing.T) {
 	}
 }
 
+func TestInsertClause_RejectsMarkerInBody(t *testing.T) {
+	body := []byte("some text\n<!-- BEGIN union:default:evil -->\nmore\n")
+	_, err := InsertClause(nil, "default:x", body)
+	if err == nil {
+		t.Fatal("expected error for body containing BEGIN marker")
+	}
+}
+
+func TestUpdateClause_RejectsMarkerInBody(t *testing.T) {
+	contract := []byte("<!-- BEGIN union:default:x -->\nold\n<!-- END union:default:x -->\n")
+	body := []byte("new <!-- END union:default:x --> bad\n")
+	_, err := UpdateClause(contract, "default:x", body)
+	if err == nil {
+		t.Fatal("expected error for body containing END marker")
+	}
+}
+
 func TestHasClause(t *testing.T) {
 	in := []byte("<!-- BEGIN union:default:x -->\nb\n<!-- END union:default:x -->\n")
 	if !HasClause(in, "default:x") {

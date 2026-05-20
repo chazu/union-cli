@@ -9,9 +9,10 @@ import (
 
 func newEditCmd() *cobra.Command {
 	return &cobra.Command{
-		Use:   "edit <path>",
-		Short: "Open a clause in $EDITOR; auto-commits on save and propagates to ratified shops.",
-		Args:  cobra.ExactArgs(1),
+		Use:               "edit <path>",
+		Short:             "Open a clause in $EDITOR; auto-commits on save and propagates to ratified shops.",
+		Args:              cobra.ExactArgs(1),
+		ValidArgsFunction: completeClausePath,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			q, err := qpath.Parse(args[0])
 			if err != nil {

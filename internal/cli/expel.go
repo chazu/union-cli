@@ -9,9 +9,10 @@ import (
 
 func newExpelCmd() *cobra.Command {
 	return &cobra.Command{
-		Use:   "expel <path>",
-		Short: "Remove a clause from the store and strike it from ratified shops.",
-		Args:  cobra.ExactArgs(1),
+		Use:               "expel <path>",
+		Short:             "Remove a clause from the store and strike it from ratified shops.",
+		Args:              cobra.ExactArgs(1),
+		ValidArgsFunction: completeClausePath,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			q, err := qpath.Parse(args[0])
 			if err != nil {
