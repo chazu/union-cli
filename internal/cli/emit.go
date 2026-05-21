@@ -76,6 +76,11 @@ func runEmit(cmd *cobra.Command, write bool, filterHarness string) error {
 		return nil
 	}
 
+	unionDir, err := paths.UnionDir()
+	if err != nil {
+		return err
+	}
+
 	fmt.Fprintf(w, "Shop: %s\n", s.Dir)
 	fmt.Fprintf(w, "Harnesses: %s\n\n", joinAdapterNames(adapters))
 
@@ -83,7 +88,10 @@ func runEmit(cmd *cobra.Command, write bool, filterHarness string) error {
 	for _, adapter := range adapters {
 		fmt.Fprintf(w, "── %s (%s) ──\n", adapter.Name(), adapter.SettingsPath())
 
-		// Filter hooks for this harness.
+		// Resolve template variables for this harness.
+		vars := harness.ResolveVars(s.Dir, unionDir, adapter.Name())
+
+		// Filter hooks for this harness and expand templates.
 		var applicable []harness.Hook
 		for _, h := range hooks {
 			if !adapter.Supports(h.Event) {
@@ -95,7 +103,7 @@ func runEmit(cmd *cobra.Command, write bool, filterHarness string) error {
 				}
 				continue
 			}
-			applicable = append(applicable, h)
+			applicable = append(applicable, vars.ExpandHook(h))
 		}
 
 		if len(applicable) == 0 {

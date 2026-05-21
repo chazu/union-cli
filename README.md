@@ -84,6 +84,105 @@ union ratify personal:writing/voice
 | `union which` | Print union paths for debugging |
 | `union completion bash\|zsh\|fish` | Generate shell completions |
 
+| `union harness detect` | Auto-detect harnesses in current shop |
+| `union harness list` | List configured/detected harnesses with capabilities |
+| `union harness add <name>` | Explicitly declare a harness |
+| `union harness remove <name>` | Remove a harness declaration |
+| `union emit [--write] [--harness X]` | Render hook clauses into native harness configs |
+| `union import hooks [--harness X]` | Import existing harness hooks into clauses |
+| `union pointer sync` | Create guidance file pointers (e.g., CLAUDE.md → AGENTS.md) |
+| `union pointer list` | Show existing pointer files |
+| `union guide <topic>` | Print agent-oriented documentation |
+
+## Cross-harness hooks
+
+Union manages hooks across multiple AI coding harnesses from a single
+source of truth. Hook clauses use normalized event names and degrade
+gracefully when a harness doesn't support an event.
+
+### Supported harnesses
+
+| Harness | Config target | Supported events |
+|---------|--------------|-----------------|
+| claude | `.claude/settings.json` | SessionStart, PreToolUse, PostToolUse, UserPrompt, Stop |
+| opencode | `.opencode/plugins/union-hooks.mjs` | SessionStart, PreToolUse, PostToolUse, UserPrompt, Stop, PreCommit |
+| codex | `codex.toml` | PreCommit |
+| jcode | `.jcode/settings.json` | SessionStart, PreToolUse, PostToolUse, Stop |
+
+### Hook clause format
+
+```markdown
+---
+type: hook
+event: SessionStart
+harnesses: [claude, opencode]
+degrade: skip
+---
+echo "started in {{shop.dir}}" >> /tmp/{{shop.name}}.log
+```
+
+### Template variables
+
+| Variable | Expands to |
+|----------|-----------|
+| `{{shop.dir}}` | Absolute shop path |
+| `{{shop.name}}` | Directory basename |
+| `{{user.email}}` | `git config user.email` |
+| `{{harness.name}}` | Target adapter name |
+| `{{union.dir}}` | Union root path |
+| `{{env.NAME}}` | Environment variable |
+
+### Workflow
+
+```bash
+# create a hook clause
+union new default:hooks/session-start
+
+# ratify it into your project
+union ratify default:hooks/session-start
+
+# preview what would be emitted
+union emit
+
+# write native configs
+union emit --write
+
+# or import existing hooks first
+union import hooks --harness claude
+```
+
+## Project config (`union.toml`)
+
+Optional per-project manifest. Convention over configuration — most
+projects need no config file at all (harnesses are auto-detected).
+
+```toml
+[harnesses.claude]
+settings = ".claude/settings.json"
+
+[harnesses.opencode]
+settings = "opencode.json"
+
+[hooks]
+ratified = ["default:hooks/session-start"]
+
+[pointers]
+targets = ["CLAUDE.md"]
+```
+
+## Guidance file pointers
+
+When your contract is `AGENTS.md` but a harness expects `CLAUDE.md`,
+union can create a pointer file:
+
+```bash
+union pointer sync
+# → CLAUDE.md points to AGENTS.md
+```
+
+The pointer file contains `@AGENTS.md` — a convention telling agents
+to read the referenced file.
+
 ## Contract markers
 
 Ratified clauses are wrapped in HTML-comment markers that carry the full

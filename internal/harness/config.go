@@ -12,6 +12,13 @@ import (
 type Config struct {
 	Harnesses map[string]HarnessConfig `toml:"harnesses"`
 	Hooks     HooksConfig              `toml:"hooks"`
+	Pointers  PointerConfig            `toml:"pointers"`
+}
+
+// PointerConfig declares symlink/redirect files that point harness-specific
+// guidance files (e.g., CLAUDE.md) to the canonical contract (e.g., AGENTS.md).
+type PointerConfig struct {
+	Targets []string `toml:"targets,omitempty"`
 }
 
 // HarnessConfig is per-harness configuration in union.toml.

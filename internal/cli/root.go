@@ -50,6 +50,8 @@ func newRootCmd() *cobra.Command {
 		newHarnessCmd(),
 		newEmitCmd(),
 		newImportCmd(),
+		newGuideCmd(),
+		newPointerCmd(),
 	)
 	return root
 }

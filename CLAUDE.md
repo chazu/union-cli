@@ -18,6 +18,7 @@ cmd/union/main.go       → entry point, delegates to cli.Execute()
 internal/cli/           → cobra commands, e2e tests
 internal/store/         → git-backed clause storage (auto-commit on mutation)
 internal/shop/          → shop registry (TOML) + contract marker parsing
+internal/harness/       → cross-harness hook adapters, config, template expansion
 internal/qpath/         → qualified path validation (store:clause/path)
 internal/paths/         → filesystem layout resolution ($UNION_DIR)
 ```
@@ -29,6 +30,9 @@ internal/paths/         → filesystem layout resolution ($UNION_DIR)
 - **Shop**: registered project directory with a contract file (default: AGENTS.md)
 - **Contract**: shop's AGENTS.md with HTML comment markers wrapping ratified clauses
 - **Qualified path**: `store:clause/path` — always includes store name
+- **Harness**: AI coding tool adapter (Claude Code, OpenCode, Codex, JCode)
+- **Hook clause**: clause with YAML frontmatter (type: hook) that emits to native harness configs
+- **Pointer**: file containing `@AGENTS.md` redirecting a harness to the canonical contract
 
 ## Conventions
 
