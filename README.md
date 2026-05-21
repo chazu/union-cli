@@ -83,7 +83,6 @@ union ratify personal:writing/voice
 | `union orphans` | List clauses not ratified by any shop |
 | `union which` | Print union paths for debugging |
 | `union completion bash\|zsh\|fish` | Generate shell completions |
-
 | `union harness detect` | Auto-detect harnesses in current shop |
 | `union harness list` | List configured/detected harnesses with capabilities |
 | `union harness add <name>` | Explicitly declare a harness |
